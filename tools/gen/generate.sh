@@ -9,4 +9,4 @@ if [ ! -d "$INCLUDE_DIR" ]; then
   exit 1
 fi
 
-./lf_gen_gcc | clang-format -style=file > $INCLUDE_DIR/lf/gcc/lf_op_gcc.h
+$INCLUDE_DIR/../tools/gen/lf_gen_gcc | clang-format -style=file > $INCLUDE_DIR/lf/gcc/lf_op_gcc.h
