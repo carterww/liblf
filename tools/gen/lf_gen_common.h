@@ -190,14 +190,48 @@ static void lf_gen_integral_same_impl(
 	}
 }
 
+static void lf_gen_all_impl_from_func(string (*generate_impl)(enum lf_gen_type),
+				      string (*define)(enum lf_gen_type,
+						       const char *))
+{
+	enum lf_gen_type type;
+	types_for_each(type) {
+		string impl = generate_impl(type);
+		string s = define(type, impl.buffer);
+		output(s.buffer);
+		string_destroy(&s);
+		string_destroy(&impl);
+	}
+}
+
 static void lf_gen_declare_var(string *s, enum lf_gen_type type,
 			       const char *name, size_t tab_count)
 {
 	APPEND_TABS(s, tab_count);
 	const char *type_name = lf_gen_type_names[type];
+	size_t type_name_len = strlen(type_name);
 	string_append_raw(s, type_name, 0);
-	string_append_raw(s, " ", 1);
+	if (type_name[type_name_len - 1] != '*') {
+		string_append_raw(s, " ", 1);
+	}
 	string_append_raw(s, name, 0);
+	string_append_raw(s, ";\n", 2);
+}
+
+static void lf_gen_declare_and_set_var(string *s, enum lf_gen_type type,
+				       const char *name, const char *value,
+				       size_t tab_count)
+{
+	APPEND_TABS(s, tab_count);
+	const char *type_name = lf_gen_type_names[type];
+	size_t type_name_len = strlen(type_name);
+	string_append_raw(s, type_name, 0);
+	if (type_name[type_name_len - 1] != '*') {
+		string_append_raw(s, " ", 1);
+	}
+	string_append_raw(s, name, 0);
+	string_append_raw(s, " = ", 3);
+	string_append_raw(s, value, 0);
 	string_append_raw(s, ";\n", 2);
 }
 
