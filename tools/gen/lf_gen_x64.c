@@ -35,13 +35,22 @@ enum lf_gen_x64_instruction {
 	LF_GEN_X64_MOV = 0,
 	LF_GEN_X64_XCHG,
 	LF_GEN_X64_CMPXCHG,
+	LF_GEN_X64_ADD,
+	LF_GEN_X64_SUB,
+	LF_GEN_X64_XADD,
+	LF_GEN_X64_NEG,
+	LF_GEN_X64_AND,
+	LF_GEN_X64_OR,
+	LF_GEN_X64_XOR,
 	LF_GEN_X64_COUNT,
 };
 
 static const char *lf_gen_x64_instruction_names[] = {
-	[LF_GEN_X64_MOV] = "mov",
-	[LF_GEN_X64_XCHG] = "xchg",
-	[LF_GEN_X64_CMPXCHG] = "cmpxchg",
+	[LF_GEN_X64_MOV] = "mov",	  [LF_GEN_X64_XCHG] = "xchg",
+	[LF_GEN_X64_CMPXCHG] = "cmpxchg", [LF_GEN_X64_ADD] = "add",
+	[LF_GEN_X64_SUB] = "sub",	  [LF_GEN_X64_XADD] = "xadd",
+	[LF_GEN_X64_NEG] = "neg",	  [LF_GEN_X64_AND] = "and",
+	[LF_GEN_X64_OR] = "or",		  [LF_GEN_X64_XOR] = "xor",
 };
 
 static const char *lf_gen_func_fence_impl[] = {
@@ -118,6 +127,7 @@ static void append_inline_asm(string *s, enum lf_gen_type type,
 			      const char *body, bool new_line)
 {
 	char ins_buf[16] = { '\0' };
+	size_t bodylen = strlen(body);
 
 	string_append_raw(s, "\t" ASM "(", ASM_LEN + 2);
 
@@ -126,7 +136,7 @@ static void append_inline_asm(string *s, enum lf_gen_type type,
 	 */
 	unsigned long i = 0;
 	unsigned long start = 0;
-	for (; i < strlen(body); ++i) {
+	for (; i < bodylen; ++i) {
 		unsigned long word_len;
 		bool is_instruction;
 		switch (body[i]) {
@@ -134,7 +144,15 @@ static void append_inline_asm(string *s, enum lf_gen_type type,
 			if (i != start) {
 				string_append_raw(s, &body[start], i - start);
 			}
-			string_append_raw(s, "\"", 1);
+			/* If next char is also an apostrophe we need to append
+			 * literal \n\t and start a new line.
+			 */
+			if (i + 1 < bodylen && body[i + 1] == '\'') {
+				string_append_raw(s, "\\n\\t\"", 5);
+				string_append_raw(s, "\n\t\t\t     ", 9);
+			} else {
+				string_append_raw(s, "\"", 1);
+			}
 			start = i + 1;
 			continue;
 		case ' ':
@@ -250,15 +268,156 @@ static string generate_casx_impl(enum lf_gen_type type)
 	string s;
 	string_init(&s, 128);
 
-	static const char *inline_asm_body = "'lock cmpxchg %2, %0'\n"
-					     ": '+m'(*p), '+a'(val_old)\n"
-					     ": 'r'(val_new)\n"
-					     ": 'memory', 'cc'";
+	static const char *asm_casx_x64 = "'lock cmpxchg %2, %0'\n"
+					  ": '+m'(*p), '+a'(val_old)\n"
+					  ": 'r'(val_new)\n"
+					  ": 'memory', 'cc'";
 
-	append_inline_asm(&s, type, inline_asm_body, true);
+	append_inline_asm(&s, type, asm_casx_x64, true);
 	/* Return the original value of p */
 	lf_gen_return(&s, "val_old", 1);
 
+	return s;
+}
+
+static string generate_faadd_fasub_impl(enum lf_gen_type type,
+					enum lf_gen_func_category cat)
+{
+	string s;
+	string_init(&s, 128);
+
+	static const char *asm_faadd_x64 = "'lock xadd %1, %0'\n"
+					   ": '+m'(*p), '+r'(val)\n"
+					   ":\n"
+					   ": 'memory', 'cc'";
+
+	static const char *asm_fasub_x64 = "'neg %1'"
+					   "'lock xadd %1, %0'\n"
+					   ": '+m'(*p), '+r'(val)\n"
+					   ":\n"
+					   ": 'memory', 'cc'";
+	const char *table[2] = {
+		[0] = asm_faadd_x64,
+		[LF_GEN_FUNC_FASUB - LF_GEN_FUNC_FAADD] = asm_fasub_x64,
+	};
+	if (cat == LF_GEN_FUNC_FAADD || cat == LF_GEN_FUNC_FASUB) {
+		append_inline_asm(&s, type, table[cat - LF_GEN_FUNC_FAADD],
+				  true);
+		lf_gen_return(&s, "val", 1);
+		return s;
+	} else if (cat == LF_GEN_FUNC_FAINC || cat == LF_GEN_FUNC_FADEC) {
+		/* Can't use immediate value with xadd so just use underlying
+		 * faadd or fasub implementation.
+		 */
+		string fname = lf_gen_func_get_name(type, cat + 2);
+		string_append_raw(&s, "\treturn ", 8);
+		string_append(&s, &fname);
+		string_append_raw(&s, "(p, 1);", 7);
+		string_destroy(&fname);
+		return s;
+	} else {
+		abort();
+	}
+	return s;
+}
+
+static string generate_faand_faor_faxor_impl(enum lf_gen_type type,
+					     enum lf_gen_func_category cat)
+{
+	string s;
+	string_init(&s, 256);
+
+	const char *table[3] = {
+		[0] = "&",
+		[LF_GEN_FUNC_FAOR - LF_GEN_FUNC_FAAND] = "|",
+		[LF_GEN_FUNC_FAXOR - LF_GEN_FUNC_FAAND] = "^",
+	};
+	string load_func = lf_gen_func_get_name(type, LF_GEN_FUNC_LOAD);
+	string_append_raw(&load_func, "(p)", 3);
+
+	string cas_func = lf_gen_func_get_name(type, LF_GEN_FUNC_CAS);
+	string_append_raw(&cas_func, "(p, old, new)", 13);
+
+	const char *op = table[cat - LF_GEN_FUNC_FAAND];
+	string new_set;
+	string_init(&new_set, 16);
+	string_append_raw(&new_set, "old ", 4);
+	string_append_raw(&new_set, op, 1);
+	string_append_raw(&new_set, " val", 4);
+
+	lf_gen_declare_var(&s, type, "old", 1);
+	lf_gen_declare_var(&s, type, "new", 1);
+	string_append_raw(&s, "\tdo {\n", 0);
+	lf_gen_set_var(&s, "old", load_func.buffer, 2);
+	lf_gen_set_var(&s, "new", new_set.buffer, 2);
+	string_append_raw(&s, "\t} while (!", 0);
+	string_append(&s, &cas_func);
+	string_append_raw(&s, ");\n", 0);
+	lf_gen_return(&s, "old", 1);
+
+	string_destroy(&load_func);
+	string_destroy(&cas_func);
+	string_destroy(&new_set);
+	return s;
+}
+
+static string generate_add_sub_impl(enum lf_gen_type type,
+				    enum lf_gen_func_category cat)
+{
+	string s;
+	string_init(&s, 128);
+
+	static const char *asm_inc_x64 = "'lock add $1, %0'\n"
+					 ": '+m'(*p)\n"
+					 ":\n"
+					 ": 'memory', 'cc'";
+
+	static const char *asm_add_x64 = "'lock add %1, %0'\n"
+					 ": '+m'(*p)\n"
+					 ": 'r'(val)\n"
+					 ": 'memory', 'cc'";
+
+	static const char *asm_dec_x64 = "'lock sub $1, %0'\n"
+					 ": '+m'(*p)\n"
+					 ":\n"
+					 ": 'memory', 'cc'";
+
+	static const char *asm_sub_x64 = "'lock sub %1, %0'\n"
+					 ": '+m'(*p)\n"
+					 ": 'r'(val)\n"
+					 ": 'memory', 'cc'";
+	const char *table[4] = {
+		[0] = asm_inc_x64,
+		[LF_GEN_FUNC_DEC - LF_GEN_FUNC_INC] = asm_dec_x64,
+		[LF_GEN_FUNC_ADD - LF_GEN_FUNC_INC] = asm_add_x64,
+		[LF_GEN_FUNC_SUB - LF_GEN_FUNC_INC] = asm_sub_x64,
+	};
+	append_inline_asm(&s, type, table[cat - LF_GEN_FUNC_INC], false);
+	return s;
+}
+
+static string generate_and_or_xor_impl(enum lf_gen_type type,
+				       enum lf_gen_func_category cat)
+{
+	string s;
+	string_init(&s, 128);
+
+#define ASM_BOP(ins)              \
+	"'lock " ins " %1, %0'\n" \
+	": '+m'(*p)\n"            \
+	": 'r'(val)\n"            \
+	": 'memory', 'cc'"
+
+	static const char *asm_and_x64 = ASM_BOP("and");
+	static const char *asm_or_x64 = ASM_BOP("or");
+	static const char *asm_xor_x64 = ASM_BOP("xor");
+#undef ASM_BOP
+	const char *table[3] = {
+		[0] = asm_and_x64,
+		[LF_GEN_FUNC_OR - LF_GEN_FUNC_AND] = asm_or_x64,
+		[LF_GEN_FUNC_XOR - LF_GEN_FUNC_AND] = asm_xor_x64,
+	};
+	append_inline_asm(&s, type, table[cat - LF_GEN_FUNC_AND], false);
 	return s;
 }
 
@@ -320,6 +479,65 @@ static void generate_cas(void)
 	lf_gen_all_impl_from_func(generate_casx_impl, lf_gen_func_casx_define);
 }
 
+static void generate_faadds_fasubs(void)
+{
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_FAADD,
+				       generate_faadd_fasub_impl,
+				       lf_gen_func_faop_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_FASUB,
+				       generate_faadd_fasub_impl,
+				       lf_gen_func_faop_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_FAINC,
+				       generate_faadd_fasub_impl,
+				       lf_gen_func_fainc_fadec_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_FADEC,
+				       generate_faadd_fasub_impl,
+				       lf_gen_func_fainc_fadec_define);
+}
+
+static void generate_faand_faor_faxor(void)
+{
+	static const char *fabitops_comment =
+		"Unfortunately x86_64 does not have an XADD like instruction for bitwise "
+		"AND, OR, or XOR. Therefore, we have to implement the fetch-and versions "
+		"of AND, OR, and XOR as CAS loops. Consider using the BTS, BTR, and BTC "
+		"functions if you only need to modify a single bit.";
+	lf_gen_module_comment(fabitops_comment);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_FAAND,
+				       generate_faand_faor_faxor_impl,
+				       lf_gen_func_faop_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_FAOR,
+				       generate_faand_faor_faxor_impl,
+				       lf_gen_func_faop_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_FAXOR,
+				       generate_faand_faor_faxor_impl,
+				       lf_gen_func_faop_define);
+}
+
+static void generate_adds_subs(void)
+{
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_ADD, generate_add_sub_impl,
+				       lf_gen_func_op_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_SUB, generate_add_sub_impl,
+				       lf_gen_func_op_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_INC, generate_add_sub_impl,
+				       lf_gen_func_inc_dec_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_DEC, generate_add_sub_impl,
+				       lf_gen_func_inc_dec_define);
+}
+
+static void generate_and_or_xor(void)
+{
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_AND,
+				       generate_and_or_xor_impl,
+				       lf_gen_func_op_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_OR, generate_and_or_xor_impl,
+				       lf_gen_func_op_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_XOR,
+				       generate_and_or_xor_impl,
+				       lf_gen_func_op_define);
+}
+
 int main(void)
 {
 	static const char *module_comment =
@@ -336,6 +554,10 @@ int main(void)
 	generate_stores();
 	generate_swaps();
 	generate_cas();
+	generate_faadds_fasubs();
+	generate_faand_faor_faxor();
+	generate_adds_subs();
+	generate_and_or_xor();
 
 	output(guard_end);
 }

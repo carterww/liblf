@@ -123,6 +123,19 @@ static const char *lf_gen_func_fence_names[] = {
 	[LF_GEN_FUNC_FENCE_STORE_ATOMIC] = "store_atomic"
 };
 
+static string lf_gen_func_get_name(enum lf_gen_type type, enum lf_gen_func_category cat)
+{
+	string s;
+	const char *namespace = lf_gen_func_category_namespaces[cat];
+	const char *type_alias = lf_gen_type_alias[type];
+	size_t nslen = strlen(namespace);
+	size_t talen = strlen(type_alias);
+	string_init(&s, nslen + talen + 1);
+	string_append_raw(&s, namespace, nslen);
+	string_append_raw(&s, type_alias, talen);
+	return s;
+}
+
 static string lf_gen_func_define(const char *return_type, const char *namespace,
 				 const char *name, const char *param_types[],
 				 const char *param_names[], size_t nparams,

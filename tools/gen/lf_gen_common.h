@@ -125,7 +125,7 @@ flush_line:
 
 static void lf_gen_module_comment(const char *comment)
 {
-	string s= lf_gen_format_comment(comment, 0, 8, false, false);
+	string s = lf_gen_format_comment(comment, 0, 8, false, false);
 	output(s.buffer);
 	output("\n");
 	string_destroy(&s);
@@ -214,6 +214,22 @@ static void lf_gen_all_impl_from_func(string (*generate_impl)(enum lf_gen_type),
 	}
 }
 
+static void lf_gen_integral_impl_from_func(
+	enum lf_gen_func_category cat,
+	string (*generate_impl)(enum lf_gen_type, enum lf_gen_func_category),
+	string (*define)(enum lf_gen_type, enum lf_gen_func_category,
+			 const char *))
+{
+	enum lf_gen_type type;
+	types_integral_for_each(type) {
+		string impl = generate_impl(type, cat);
+		string s = define(type, cat, impl.buffer);
+		output(s.buffer);
+		string_destroy(&s);
+		string_destroy(&impl);
+	}
+}
+
 static void lf_gen_declare_var(string *s, enum lf_gen_type type,
 			       const char *name, size_t tab_count)
 {
@@ -239,6 +255,16 @@ static void lf_gen_declare_and_set_var(string *s, enum lf_gen_type type,
 	if (type_name[type_name_len - 1] != '*') {
 		string_append_raw(s, " ", 1);
 	}
+	string_append_raw(s, name, 0);
+	string_append_raw(s, " = ", 3);
+	string_append_raw(s, value, 0);
+	string_append_raw(s, ";\n", 2);
+}
+
+static void lf_gen_set_var(string *s, const char *name, const char *value,
+			   size_t tab_count)
+{
+	APPEND_TABS(s, tab_count);
 	string_append_raw(s, name, 0);
 	string_append_raw(s, " = ", 3);
 	string_append_raw(s, value, 0);
