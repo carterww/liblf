@@ -226,7 +226,7 @@ int main(void)
 		"x86 assembly, specifically for x86_64. You should not include this file directly, but "
 		"you can if you want to use the x64 functions directly. If you want to let liblf "
 		"decide, include lf_op.h instead.";
-	lf_gen_header_output("liblf/tools/gen/lf_gen_gcc.c", module_comment);
+	lf_gen_header_output("liblf/tools/gen/lf_gen_x64.c", module_comment);
 	output(guard_start);
 	output(includes);
 
