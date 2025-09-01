@@ -179,7 +179,7 @@ static string generate_cas_impl(enum lf_gen_type type)
 
 	/* Declare the variable */
 	string_append_raw(&s, "\tbool zf;\n", 0);
-	/* Inline asm with mov */
+	/* Inline asm with cmpxchg */
 	string_append_raw(&s, "\t" ASM "(\"lock ", 0);
 	string_append_raw(&s, ins.ins, 8);
 	string_append_raw(&s, " %3, %0\" :", 0);
@@ -200,7 +200,7 @@ static string generate_casx_impl(enum lf_gen_type type)
 
 	/* Declare the variable */
 	lf_gen_declare_and_set_var(&s, type, "val_orig", "val_old", 1);
-	/* Inline asm with mov */
+	/* Inline asm with cmpxchg */
 	string_append_raw(&s, "\t" ASM "(\"lock ", 0);
 	string_append_raw(&s, ins.ins, 8);
 	string_append_raw(&s, " %2, %0\" :", 0);
