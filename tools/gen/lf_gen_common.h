@@ -92,7 +92,9 @@ static string lf_gen_format_comment(const char *comment, size_t tab_count,
 		}
 		break;
 flush_line:
-		string_append_raw(&s, &comment[start], i - start);
+		if (i != start) {
+			string_append_raw(&s, &comment[start], i - start);
+		}
 		string_append_raw(&s, "\n", 1);
 		i += 1;
 		start = i;
@@ -119,6 +121,14 @@ flush_line:
 	}
 
 	return s;
+}
+
+static void lf_gen_module_comment(const char *comment)
+{
+	string s= lf_gen_format_comment(comment, 0, 8, false, false);
+	output(s.buffer);
+	output("\n");
+	string_destroy(&s);
 }
 
 static void lf_gen_header_output(const char *generator_name,
