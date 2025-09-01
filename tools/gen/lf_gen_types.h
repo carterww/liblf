@@ -5,6 +5,14 @@
 #ifndef LF_GEN_TYPES_H
 #define LF_GEN_TYPES_H
 
+#define types_for_each(type_enum_var)         \
+	for (type_enum_var = LF_GEN_TYPE_PTR; \
+	     type_enum_var < LF_GEN_TYPE_COUNT; ++type_enum_var)
+
+#define types_integral_for_each(type_enum_var)    \
+	for (type_enum_var = LF_GEN_TYPE_PTR + 1; \
+	     type_enum_var < LF_GEN_TYPE_COUNT; ++type_enum_var)
+
 enum lf_gen_type {
 	/* PTR should always be 0 */
 	LF_GEN_TYPE_PTR = 0,

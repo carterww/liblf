@@ -4,7 +4,7 @@
 
 /* This file was automatically generated. DO NOT MODIFY IT DIRECTLY.
  *
- * Date:      2025-08-31 18:58:16
+ * Date:      2025-08-31 22:29:05
  * Generator: liblf/tools/gen/lf_gen_gcc.c
  * Version:   v0.1.0
  *
@@ -1010,121 +1010,121 @@ static lf_native_word lf_op_fainc_native(lf_native_word *p)
 LF_ATTR_ALWAYS_INLINE
 static intptr_t lf_op_fadec_iptr(intptr_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uintptr_t lf_op_fadec_uptr(uintptr_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static signed char lf_op_fadec_char(signed char *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned char lf_op_fadec_uchar(unsigned char *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static short lf_op_fadec_short(short *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned short lf_op_fadec_ushort(unsigned short *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int lf_op_fadec_int(int *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_op_fadec_uint(unsigned int *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static long lf_op_fadec_long(long *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned long lf_op_fadec_ulong(unsigned long *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int8_t lf_op_fadec_i8(int8_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint8_t lf_op_fadec_u8(uint8_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int16_t lf_op_fadec_i16(int16_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint16_t lf_op_fadec_u16(uint16_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int32_t lf_op_fadec_i32(int32_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint32_t lf_op_fadec_u32(uint32_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int64_t lf_op_fadec_i64(int64_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint64_t lf_op_fadec_u64(uint64_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static size_t lf_op_fadec_size(size_t *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static lf_native_word lf_op_fadec_native(lf_native_word *p)
 {
-	return __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);
+	return __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE

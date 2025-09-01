@@ -10,7 +10,12 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "lf_gen_functions.h"
 #include "lf_gen_string.h"
+#include "lf_gen_types.h"
+
+#define ASM "__asm__ __volatile__"
+#define ASM_LEN (sizeof(ASM) - 1)
 
 static const char *license = "/* SPDX-License-Identifier: MIT\n"
 			     " * Copyright (c) 2025 Carter Williams\n"
@@ -21,6 +26,13 @@ static void output(const char *s)
 	int res = fputs(s, stdout);
 	lf_assert(res != EOF);
 }
+
+#define APPEND_TABS(s_ptr, tab_count)                             \
+	do {                                                      \
+		for (size_t xyab = 0; xyab < tab_count; ++xyab) { \
+			string_append_raw(s_ptr, "\t", 1);        \
+		}                                                 \
+	} while (0)
 
 /* I know this function is crappy. I just wanted something quick and dirty */
 static string lf_gen_format_comment(const char *comment, size_t tab_count,
@@ -40,12 +52,10 @@ static string lf_gen_format_comment(const char *comment, size_t tab_count,
 	size_t last_sp = 0;
 	size_t i = 0;
 	size_t start = 0;
-	size_t current_width;
+	size_t current_width = tab_len;
 	while (i < comment_len) {
 		current_width = tab_len;
-		for (size_t tab_n = 0; tab_n < tab_count; ++tab_n) {
-			string_append_raw(&s, "\t", 1);
-		}
+		APPEND_TABS(&s, tab_count);
 		if (inline_comment) {
 			string_append_raw(&s, "// ", 3);
 		} else {
@@ -148,11 +158,55 @@ static void lf_gen_header_output(const char *generator_name,
 		string comment =
 			lf_gen_format_comment(extra_comment, 0, 8, false, true);
 		string_append(&h, &comment);
+		string_destroy(&comment);
 	}
 	string_append_raw(&h, " */\n\n", 0);
 
 	output(h.buffer);
 	string_destroy(&h);
+}
+
+static void lf_gen_all_same_impl(const char *impl,
+				 string (*func)(enum lf_gen_type, const char *))
+{
+	enum lf_gen_type type;
+	types_for_each(type) {
+		string s = func(type, impl);
+		output(s.buffer);
+		string_destroy(&s);
+	}
+}
+
+static void lf_gen_integral_same_impl(
+	enum lf_gen_func_category cat, const char *impl,
+	string (*func)(enum lf_gen_type, enum lf_gen_func_category cat,
+		       const char *))
+{
+	enum lf_gen_type type;
+	types_integral_for_each(type) {
+		string s = func(type, cat, impl);
+		output(s.buffer);
+		string_destroy(&s);
+	}
+}
+
+static void lf_gen_declare_var(string *s, enum lf_gen_type type,
+			       const char *name, size_t tab_count)
+{
+	APPEND_TABS(s, tab_count);
+	const char *type_name = lf_gen_type_names[type];
+	string_append_raw(s, type_name, 0);
+	string_append_raw(s, " ", 1);
+	string_append_raw(s, name, 0);
+	string_append_raw(s, ";\n", 2);
+}
+
+static void lf_gen_return(string *s, const char *name, size_t tab_count)
+{
+	APPEND_TABS(s, tab_count);
+	string_append_raw(s, "return ", 7);
+	string_append_raw(s, name, 0);
+	string_append_raw(s, ";", 1);
 }
 
 #endif /* LF_GEN_COMMON_H */

@@ -1,2 +1,3 @@
 *.d
 lf_gen_gcc
+lf_gen_x64

@@ -65,54 +65,32 @@ static const char *lf_gen_func_fence_impl_wmo[] = {
 	[LF_GEN_FUNC_FENCE_STORE_ATOMIC] = LF_FENCE_FULL
 };
 
-static void generate_all_same_impl(const char *impl,
-				   string (*func)(enum lf_gen_type,
-						  const char *))
-{
-	for (int i = 0; i < LF_GEN_TYPE_COUNT; ++i) {
-		string s = func((enum lf_gen_type)i, impl);
-		output(s.buffer);
-	}
-}
-
-static void generate_integral_same_impl(
-	enum lf_gen_func_category cat, const char *impl,
-	string (*func)(enum lf_gen_type, enum lf_gen_func_category cat,
-		       const char *))
-{
-	for (int i = LF_GEN_TYPE_PTR + 1; i < LF_GEN_TYPE_COUNT; ++i) {
-		string s = func((enum lf_gen_type)i, cat, impl);
-		output(s.buffer);
-	}
-}
-
 static void generate_fences(void)
 {
-	for (int i = 0; i <= LF_GEN_FUNC_FENCE_LOAD_FORCE; ++i) {
-		enum lf_gen_func_fence f = (enum lf_gen_func_fence)i;
+	enum lf_gen_func_fence fence;
+	fence_force_for_each(fence) {
 		string s = lf_gen_func_fence_define(
-			f, lf_gen_func_fence_impl_tso[f]);
+			fence, lf_gen_func_fence_impl_tso[fence]);
 		output(s.buffer);
+		string_destroy(&s);
 	}
 
 	output("#if defined(LF_MEM_TSO)\n\n");
 
-	for (int i = LF_GEN_FUNC_FENCE_LOAD_FORCE + 1;
-	     i < LF_GEN_FUNC_FENCE_COUNT; ++i) {
-		enum lf_gen_func_fence f = (enum lf_gen_func_fence)i;
+	fence_other_for_each(fence) {
 		string s = lf_gen_func_fence_define(
-			f, lf_gen_func_fence_impl_tso[f]);
+			fence, lf_gen_func_fence_impl_tso[fence]);
 		output(s.buffer);
+		string_destroy(&s);
 	}
 
 	output("#elif defined(LF_MEM_WMO)\n\n");
 
-	for (int i = LF_GEN_FUNC_FENCE_LOAD_FORCE + 1;
-	     i < LF_GEN_FUNC_FENCE_COUNT; ++i) {
-		enum lf_gen_func_fence f = (enum lf_gen_func_fence)i;
+	fence_other_for_each(fence) {
 		string s = lf_gen_func_fence_define(
-			f, lf_gen_func_fence_impl_wmo[f]);
+			fence, lf_gen_func_fence_impl_wmo[fence]);
 		output(s.buffer);
+		string_destroy(&s);
 	}
 
 	output("#else\n#error Unsupported memory model detected\n");
@@ -124,21 +102,21 @@ static void generate_loads(void)
 {
 	static const char *impl =
 		"\treturn __atomic_load_n(p, __ATOMIC_RELAXED);";
-	generate_all_same_impl(impl, lf_gen_func_load_define);
+	lf_gen_all_same_impl(impl, lf_gen_func_load_define);
 }
 
 static void generate_stores(void)
 {
 	static const char *impl =
 		"\t__atomic_store_n(p, val, __ATOMIC_RELAXED);";
-	generate_all_same_impl(impl, lf_gen_func_store_define);
+	lf_gen_all_same_impl(impl, lf_gen_func_store_define);
 }
 
 static void generate_swaps(void)
 {
 	static const char *impl =
 		"\treturn __atomic_exchange_n(p, val, __ATOMIC_RELAXED);";
-	generate_all_same_impl(impl, lf_gen_func_swap_define);
+	lf_gen_all_same_impl(impl, lf_gen_func_swap_define);
 }
 
 static void generate_cas(void)
@@ -152,14 +130,15 @@ static void generate_cas(void)
 		"\t\t__ATOMIC_RELAXED, __ATOMIC_RELAXED);\n"
 		"\treturn val_old;";
 
-	generate_all_same_impl(cas_impl, lf_gen_func_cas_define);
-	generate_all_same_impl(casx_impl, lf_gen_func_casx_define);
+	lf_gen_all_same_impl(cas_impl, lf_gen_func_cas_define);
+	lf_gen_all_same_impl(casx_impl, lf_gen_func_casx_define);
 }
 
 static void generate_faop_impl(enum lf_gen_type type,
 			       enum lf_gen_func_category cat)
 {
 	static const char *ops[] = {
+		[LF_GEN_FUNC_FAINC] = "add", [LF_GEN_FUNC_FADEC] = "sub",
 		[LF_GEN_FUNC_FAADD] = "add", [LF_GEN_FUNC_FASUB] = "sub",
 		[LF_GEN_FUNC_FAAND] = "and", [LF_GEN_FUNC_FAOR] = "or",
 		[LF_GEN_FUNC_FAXOR] = "xor",
@@ -168,9 +147,17 @@ static void generate_faop_impl(enum lf_gen_type type,
 	string_init(&impl, 64);
 	string_append_raw(&impl, "\treturn __atomic_fetch_", 0);
 	string_append_raw(&impl, ops[cat], 0);
-	string_append_raw(&impl, "(p, val, __ATOMIC_RELAXED);", 0);
-	string s = lf_gen_func_faop_define(type, cat, impl.buffer);
+	string s;
+	if (cat == LF_GEN_FUNC_FAINC || cat == LF_GEN_FUNC_FADEC) {
+		string_append_raw(&impl, "(p, 1, __ATOMIC_RELAXED);", 0);
+		s = lf_gen_func_fainc_fadec_define(type, cat, impl.buffer);
+	} else {
+		string_append_raw(&impl, "(p, val, __ATOMIC_RELAXED);", 0);
+		s = lf_gen_func_faop_define(type, cat, impl.buffer);
+	}
 	output(s.buffer);
+	string_destroy(&s);
+	string_destroy(&impl);
 }
 
 static enum lf_gen_func_category lf_cat_to_facat(enum lf_gen_func_category cat)
@@ -199,32 +186,26 @@ static void generate_op_impl(enum lf_gen_type type,
 		s = lf_gen_func_op_define(type, cat, impl.buffer);
 	}
 	output(s.buffer);
+	string_destroy(&s);
+	string_destroy(&impl);
 }
 
 static void generate_reg_ops(void)
 {
-	static const char *fainc_impl =
-		"\treturn __atomic_fetch_add(p, 1, __ATOMIC_RELAXED);";
-	static const char *fadec_impl =
-		"\treturn __atomic_fetch_sub(p, 1, __ATOMIC_RELAXED);";
+	enum lf_gen_type type;
+	enum lf_gen_func_category func;
 
-	generate_integral_same_impl(LF_GEN_FUNC_FAINC, fainc_impl,
-				    lf_gen_func_fainc_fadec_define);
-	generate_integral_same_impl(LF_GEN_FUNC_FADEC, fainc_impl,
-				    lf_gen_func_fainc_fadec_define);
-
-	for (int i = LF_GEN_FUNC_FAADD; i < LF_GEN_FUNC_FAXOR + 1; ++i) {
-		for (int j = LF_GEN_TYPE_PTR + 1; j < LF_GEN_TYPE_COUNT; ++j) {
-			generate_faop_impl((enum lf_gen_type)j,
-					   (enum lf_gen_func_category)i);
+	/* Iterate over all the fetch and _ ops */
+	funcs_faops_for_each(func) {
+		types_integral_for_each(type) {
+			generate_faop_impl(type, func);
 		}
 	}
 
-	/* Generate all other ops */
-	for (int i = LF_GEN_FUNC_INC; i < LF_GEN_FUNC_XOR + 1; ++i) {
-		for (int j = LF_GEN_TYPE_PTR + 1; j < LF_GEN_TYPE_COUNT; ++j) {
-			generate_op_impl((enum lf_gen_type)j,
-					 (enum lf_gen_func_category)i);
+	/* Iterate over all the non-fetch variants of the previous ops */
+	funcs_ops_for_each(func) {
+		types_integral_for_each(type) {
+			generate_op_impl(type, func);
 		}
 	}
 }
@@ -259,6 +240,8 @@ static void genereate_bitop_impl(enum lf_gen_type type,
 
 	string s = lf_gen_func_bitop_define(type, cat, impl.buffer);
 	output(s.buffer);
+	string_destroy(&s);
+	string_destroy(&impl);
 }
 
 static void generate_bitops(void)
@@ -269,21 +252,19 @@ static void generate_bitops(void)
 		"__atomic_fetch_and(p, ~mask, __ATOMIC_RELAXED);";
 	static const char *btc_op =
 		"__atomic_fetch_xor(p, mask, __ATOMIC_RELAXED);";
+
+	enum lf_gen_type type;
+
 	/* Generate all bts functions */
-	for (int j = LF_GEN_TYPE_PTR + 1; j < LF_GEN_TYPE_COUNT; ++j) {
-		enum lf_gen_type type = (enum lf_gen_type)j;
+	types_integral_for_each(type) {
 		genereate_bitop_impl(type, LF_GEN_FUNC_BTS, bts_op);
 	}
-
 	/* Generate all btr functions */
-	for (int j = LF_GEN_TYPE_PTR + 1; j < LF_GEN_TYPE_COUNT; ++j) {
-		enum lf_gen_type type = (enum lf_gen_type)j;
+	types_integral_for_each(type) {
 		genereate_bitop_impl(type, LF_GEN_FUNC_BTR, btr_op);
 	}
-
 	/* Generate all btc functions */
-	for (int j = LF_GEN_TYPE_PTR + 1; j < LF_GEN_TYPE_COUNT; ++j) {
-		enum lf_gen_type type = (enum lf_gen_type)j;
+	types_integral_for_each(type) {
 		genereate_bitop_impl(type, LF_GEN_FUNC_BTC, btc_op);
 	}
 }

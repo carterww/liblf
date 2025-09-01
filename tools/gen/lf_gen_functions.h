@@ -12,6 +12,14 @@
 
 static const char *func_prefix = "LF_ATTR_ALWAYS_INLINE\nstatic ";
 
+#define funcs_faops_for_each(func_enum_var)     \
+	for (func_enum_var = LF_GEN_FUNC_FAINC; \
+	     func_enum_var <= LF_GEN_FUNC_FAXOR; ++func_enum_var)
+
+#define funcs_ops_for_each(func_enum_var)     \
+	for (func_enum_var = LF_GEN_FUNC_INC; \
+	     func_enum_var <= LF_GEN_FUNC_XOR; ++func_enum_var)
+
 enum lf_gen_func_category {
 	/* Don't reorder these */
 	LF_GEN_FUNC_FENCE = 0,
@@ -65,6 +73,18 @@ static const char *lf_gen_func_category_namespaces[] = {
 	[LF_GEN_FUNC_BTC] = "lf_op_btc_",
 	[LF_GEN_FUNC_BTR] = "lf_op_btr_",
 };
+
+#define fence_all_for_each(fence_enum_var)          \
+	for (fence_enum_var = LF_GEN_FUNC_FENCE_CC; \
+	     fence_enum_var < LF_GEN_FUNC_FENCE_COUNT; ++fence_enum_var)
+
+#define fence_force_for_each(fence_enum_var)        \
+	for (fence_enum_var = LF_GEN_FUNC_FENCE_CC; \
+	     fence_enum_var <= LF_GEN_FUNC_FENCE_LOAD_FORCE; ++fence_enum_var)
+
+#define fence_other_for_each(fence_enum_var)          \
+	for (fence_enum_var = LF_GEN_FUNC_FENCE_FULL; \
+	     fence_enum_var < LF_GEN_FUNC_FENCE_COUNT; ++fence_enum_var)
 
 enum lf_gen_func_fence {
 	/* Don't reorder these first 4 */
