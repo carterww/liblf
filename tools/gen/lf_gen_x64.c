@@ -42,6 +42,9 @@ enum lf_gen_x64_instruction {
 	LF_GEN_X64_AND,
 	LF_GEN_X64_OR,
 	LF_GEN_X64_XOR,
+	LF_GEN_X64_BTS,
+	LF_GEN_X64_BTR,
+	LF_GEN_X64_BTC,
 	LF_GEN_X64_COUNT,
 };
 
@@ -51,6 +54,8 @@ static const char *lf_gen_x64_instruction_names[] = {
 	[LF_GEN_X64_SUB] = "sub",	  [LF_GEN_X64_XADD] = "xadd",
 	[LF_GEN_X64_NEG] = "neg",	  [LF_GEN_X64_AND] = "and",
 	[LF_GEN_X64_OR] = "or",		  [LF_GEN_X64_XOR] = "xor",
+	[LF_GEN_X64_BTS] = "bts",	  [LF_GEN_X64_BTR] = "btr",
+	[LF_GEN_X64_BTC] = "btc",
 };
 
 static const char *lf_gen_func_fence_impl[] = {
@@ -99,6 +104,13 @@ static const char lf_gen_x64_size_to_suffix[] = {
 	[8] = 'q',
 };
 
+static const char *lf_gen_x64_size_to_utype_name[] = {
+	[1] = "uint8_t",
+	[2] = "uint16_t",
+	[4] = "uint32_t",
+	[8] = "uint64_t",
+};
+
 static bool transform_possible_instruction(const char *word, size_t word_len,
 					   char buf[16], enum lf_gen_type type)
 {
@@ -116,6 +128,15 @@ static bool transform_possible_instruction(const char *word, size_t word_len,
 		size_t size = lf_gen_x64_type_to_size[type];
 		char suffix = lf_gen_x64_size_to_suffix[size];
 		memcpy(buf, word, word_len);
+		/* bts, btc, and btr do not operate on 1 byte destinations.
+		 * We'll use the w suffix instead of b if type is 1 byte.
+		 */
+		if (ins == LF_GEN_X64_BTS || ins == LF_GEN_X64_BTC ||
+		    ins == LF_GEN_X64_BTR) {
+			if (size == 1) {
+				suffix = lf_gen_x64_size_to_suffix[2];
+			}
+		}
 		buf[word_len] = suffix;
 		buf[word_len + 1] = '\0';
 		return true;
@@ -421,6 +442,56 @@ static string generate_and_or_xor_impl(enum lf_gen_type type,
 	return s;
 }
 
+static string generate_btops_impl(enum lf_gen_type type,
+				  enum lf_gen_func_category cat)
+{
+	string s;
+	string_init(&s, 128);
+	size_t type_size = lf_gen_x64_type_to_size[type];
+	/* bts, btc, and btr don't work on 1 byte memory locations/
+	 * registers. We need to treat the type as 2 bytes.
+	 */
+	if (type_size == 1) {
+		type_size = 2;
+	}
+	const char *utype_name = lf_gen_x64_size_to_utype_name[type_size];
+
+#define ASM_BOP(ins)                \
+	"'lock " ins " %2, %0'\n"   \
+	": '+m'(*p), '=@ccc'(cf)\n" \
+	": 'r'((^)index)\n"        \
+	": 'memory', 'cc'"
+
+	static const char *asm_bts_x64 = ASM_BOP("bts");
+	static const char *asm_btc_x64 = ASM_BOP("btc");
+	static const char *asm_btr_x64 = ASM_BOP("btr");
+#undef ASM_BOP
+	const char *table[3] = {
+		[0] = asm_bts_x64,
+		[LF_GEN_FUNC_BTC - LF_GEN_FUNC_BTS] = asm_btc_x64,
+		[LF_GEN_FUNC_BTR - LF_GEN_FUNC_BTS] = asm_btr_x64,
+	};
+
+	string impl;
+	string_init(&impl, 64);
+	const char *asm_templ = table[cat - LF_GEN_FUNC_BTS];
+	size_t asm_templ_len = strlen(asm_templ);
+	for (size_t i = 0; i < asm_templ_len; ++i) {
+		if (asm_templ[i] != '^') {
+			string_append_raw(&impl, &asm_templ[i], 1);
+			continue;
+		}
+		string_append_raw(&impl, utype_name, 0);
+	}
+
+	/* Delcare variable to hold cf */
+	string_append_raw(&s, "\tbool cf;\n", 0);
+	append_inline_asm(&s, type, impl.buffer, true);
+	lf_gen_return(&s, "cf", 1);
+	string_destroy(&impl);
+	return s;
+}
+
 static void generate_fences(void)
 {
 	enum lf_gen_func_fence fence;
@@ -538,6 +609,16 @@ static void generate_and_or_xor(void)
 				       lf_gen_func_op_define);
 }
 
+static void generate_btops(void)
+{
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_BTS, generate_btops_impl,
+				       lf_gen_func_bitop_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_BTC, generate_btops_impl,
+				       lf_gen_func_bitop_define);
+	lf_gen_integral_impl_from_func(LF_GEN_FUNC_BTR, generate_btops_impl,
+				       lf_gen_func_bitop_define);
+}
+
 int main(void)
 {
 	static const char *module_comment =
@@ -558,6 +639,7 @@ int main(void)
 	generate_faand_faor_faxor();
 	generate_adds_subs();
 	generate_and_or_xor();
+	generate_btops();
 
 	output(guard_end);
 }
