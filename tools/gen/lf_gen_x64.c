@@ -362,9 +362,9 @@ static string generate_faand_faor_faxor_impl(enum lf_gen_type type,
 	const char *op = table[cat - LF_GEN_FUNC_FAAND];
 	string new_set;
 	string_init(&new_set, 16);
-	string_append_raw(&new_set, "old ", 4);
+	string_append_raw(&new_set, "(old ", 5);
 	string_append_raw(&new_set, op, 1);
-	string_append_raw(&new_set, " val", 4);
+	string_append_raw(&new_set, " val)", 5);
 
 	lf_gen_declare_var(&s, type, "old", 1);
 	lf_gen_declare_var(&s, type, "new", 1);
@@ -459,7 +459,7 @@ static string generate_btops_impl(enum lf_gen_type type,
 #define ASM_BOP(ins)                \
 	"'lock " ins " %2, %0'\n"   \
 	": '+m'(*p), '=@ccc'(cf)\n" \
-	": 'r'((^)index)\n"        \
+	": 'r'((^)index)\n"         \
 	": 'memory', 'cc'"
 
 	static const char *asm_bts_x64 = ASM_BOP("bts");
