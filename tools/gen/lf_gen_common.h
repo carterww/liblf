@@ -307,4 +307,30 @@ static void lf_gen_return(string *s, const char *name, size_t tab_count)
 	string_append_raw(s, ";", 1);
 }
 
+static void lf_gen_output_op_sup_macro(enum lf_gen_type type,
+				       enum lf_gen_func_category func,
+				       bool supported)
+{
+	string s;
+	string_init(&s, 64);
+	const char *namespace = lf_gen_func_category_namespaces[func];
+	const char *type_alias = lf_gen_type_alias[type];
+	string_append_raw(&s, "#define ", 8);
+	for (size_t i = 0; i < strlen(namespace); ++i) {
+		char c = char_to_upper(namespace[i]);
+		string_append_char(&s, c);
+	}
+	for (size_t i = 0; i < strlen(type_alias); ++i) {
+		char c = char_to_upper(type_alias[i]);
+		string_append_char(&s, c);
+	}
+	if (supported) {
+		string_append_raw(&s, "_SUP 1\n", 7);
+	} else {
+		string_append_raw(&s, "_SUP 0\n", 7);
+	}
+	output(s.buffer);
+	string_destroy(&s);
+}
+
 #endif /* LF_GEN_COMMON_H */

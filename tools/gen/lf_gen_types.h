@@ -106,6 +106,43 @@ static const char *lf_gen_type_alias[] = {
 	[LF_GEN_TYPE_NATIVE] = "native"
 };
 
+/* Min sizes of types across all supported architectures */
+static const size_t lf_gen_type_min_sizes[] = {
+	[LF_GEN_TYPE_PTR] = 4,	  [LF_GEN_TYPE_IPTR] = 4,
+	[LF_GEN_TYPE_UPTR] = 4,	  [LF_GEN_TYPE_CHAR] = 1,
+	[LF_GEN_TYPE_UCHAR] = 1,  [LF_GEN_TYPE_SHORT] = 2,
+	[LF_GEN_TYPE_USHORT] = 2, [LF_GEN_TYPE_INT] = 2,
+	[LF_GEN_TYPE_UINT] = 2,	  [LF_GEN_TYPE_LONG] = 4,
+	[LF_GEN_TYPE_ULONG] = 4,  [LF_GEN_TYPE_I8] = 1,
+	[LF_GEN_TYPE_U8] = 1,	  [LF_GEN_TYPE_I16] = 2,
+	[LF_GEN_TYPE_U16] = 2,	  [LF_GEN_TYPE_I32] = 4,
+	[LF_GEN_TYPE_U32] = 4,	  [LF_GEN_TYPE_I64] = 8,
+	[LF_GEN_TYPE_U64] = 8,	  [LF_GEN_TYPE_SIZE] = 4,
+	[LF_GEN_TYPE_NATIVE] = 4
+};
+
+/* Max sizes of types across all supported architectures */
+static const size_t lf_gen_type_max_sizes[] = {
+	[LF_GEN_TYPE_PTR] = 8,	  [LF_GEN_TYPE_IPTR] = 8,
+	[LF_GEN_TYPE_UPTR] = 8,	  [LF_GEN_TYPE_CHAR] = 1,
+	[LF_GEN_TYPE_UCHAR] = 1,  [LF_GEN_TYPE_SHORT] = 2,
+	[LF_GEN_TYPE_USHORT] = 2, [LF_GEN_TYPE_INT] = 4,
+	[LF_GEN_TYPE_UINT] = 4,	  [LF_GEN_TYPE_LONG] = 8,
+	[LF_GEN_TYPE_ULONG] = 8,  [LF_GEN_TYPE_I8] = 1,
+	[LF_GEN_TYPE_U8] = 1,	  [LF_GEN_TYPE_I16] = 2,
+	[LF_GEN_TYPE_U16] = 2,	  [LF_GEN_TYPE_I32] = 4,
+	[LF_GEN_TYPE_U32] = 4,	  [LF_GEN_TYPE_I64] = 8,
+	[LF_GEN_TYPE_U64] = 8,	  [LF_GEN_TYPE_SIZE] = 8,
+	[LF_GEN_TYPE_NATIVE] = 8
+};
+
+static bool lf_gen_type_is_native_width(enum lf_gen_type type)
+{
+	return type == LF_GEN_TYPE_PTR || type == LF_GEN_TYPE_IPTR ||
+	       type == LF_GEN_TYPE_UPTR || type == LF_GEN_TYPE_SIZE ||
+	       type == LF_GEN_TYPE_NATIVE;
+}
+
 static string lf_gen_type_dcas_name(enum lf_gen_type type, bool ptr)
 {
 	static const char *dcas_type_namespace = "lf_dcas_packed_";
@@ -158,8 +195,7 @@ static string lf_gen_type_dcas_define(enum lf_gen_type type,
 	snprintf(buf, 128, "\t%s%stuple[2];\n", raw_type_name,
 		 type_double_width == LF_GEN_TYPE_PTR ? "" : " ");
 	string_append_raw(&s, buf, 0);
-	snprintf(buf, 128, "} LF_ATTR_ALIGNED(%zu);\n",
-		 type_double_alignment);
+	snprintf(buf, 128, "} LF_ATTR_ALIGNED(%zu);\n", type_double_alignment);
 	string_append_raw(&s, buf, 0);
 
 	string_destroy(&union_name);

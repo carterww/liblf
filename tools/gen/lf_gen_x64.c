@@ -809,33 +809,6 @@ static void generate_op(void)
 	lf_gen_header_guard(guard_op, false);
 }
 
-static void generate_op_sup_macro(enum lf_gen_type type,
-				    enum lf_gen_func_category func,
-				    bool supported)
-{
-	TYPE_NAME_VARS(type);
-	NAMESPACE_VAR(func);
-
-	string s;
-	string_init(&s, 64);
-	string_append_raw(&s, "#define ", 8);
-	for (size_t i = 0; i < strlen(namespace); ++i) {
-		char c = char_to_upper(namespace[i]);
-		string_append_char(&s, c);
-	}
-	for (size_t i = 0; i < strlen(type_alias); ++i) {
-		char c = char_to_upper(type_alias[i]);
-		string_append_char(&s, c);
-	}
-	if (supported) {
-		string_append_raw(&s, "_SUP 1\n", 7);
-	} else {
-		string_append_raw(&s, "_SUP 0\n", 7);
-	}
-	output(s.buffer);
-	string_destroy(&s);
-}
-
 static void generate_op_sup(void)
 {
 	static const char *module_comment_op_sup =
@@ -854,8 +827,9 @@ static void generate_op_sup(void)
 	funcs_for_each(func) {
 		bool integral_only_func = lf_gen_func_is_integral_only(func);
 		types_for_each(type) {
-			bool supported = !integral_only_func || type != LF_GEN_TYPE_PTR;
-			generate_op_sup_macro(type, func, supported);
+			bool supported = !integral_only_func ||
+					 type != LF_GEN_TYPE_PTR;
+			lf_gen_output_op_sup_macro(type, func, supported);
 		}
 		output("\n");
 	}

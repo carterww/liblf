@@ -11,9 +11,8 @@
 #include "lf_gen_string.h"
 #include "lf_gen_types.h"
 
-static const char *guard_start = "#ifndef LF_OP_GCC_H\n"
-				 "#define LF_OP_GCC_H\n\n";
-static const char *guard_end = "#endif /* LF_OP_GCC_H */\n";
+static const char *guard_op = "LF_OP_GCC_H";
+static const char *guard_op_sup = "LF_OP_GCC_SUP_H";
 
 static const char *includes = "#include <stdbool.h>\n"
 			      "#include <stddef.h>\n"
@@ -269,15 +268,15 @@ static void generate_bitops(void)
 	}
 }
 
-int main(void)
+static void generate_op(void)
 {
-	static const char *module_comment =
+	static const char *module_comment_op =
 		"lf_op_gcc.h implements many atomic and lock-free related functions using "
 		"only GCC __atomic intrinsics. You should not include this file directly, but "
 		"you can if you want to use the GCC intrinsics directly. If you want to let liblf "
 		"decide, include lf_op.h instead.";
-	lf_gen_header_output("liblf/tools/gen/lf_gen_gcc.c", module_comment);
-	output(guard_start);
+	lf_gen_header_output("liblf/tools/gen/lf_gen_gcc.c", module_comment_op);
+	lf_gen_header_guard(guard_op, true);
 	output(includes);
 
 	generate_fences();
@@ -288,5 +287,69 @@ int main(void)
 	generate_reg_ops();
 	generate_bitops();
 
-	output(guard_end);
+	lf_gen_header_guard(guard_op, false);
+}
+
+static bool is_op_supported(enum lf_gen_func_category func,
+			    enum lf_gen_type type)
+{
+	/* Don't support ops like add, sub, or for pointers */
+	if (lf_gen_func_is_integral_only(func) && type == LF_GEN_TYPE_PTR) {
+		return false;
+	}
+	/* I haven't written these, and I'm not sure if I want to using GCC builtins */
+	if (func == LF_GEN_FUNC_DCAS || func == LF_GEN_FUNC_DCASX) {
+		return false;
+	}
+	size_t max_size = lf_gen_type_max_sizes[type];
+	/* If the max size is 1, 2, or 4 then it is supported on all architectures.
+	 * If not, check if its size is "native" to the arch (ptr, size_t, etc.)
+	 */
+	return max_size < 8 || lf_gen_type_is_native_width(type);
+}
+
+static void generate_op_sup(void)
+{
+	static const char *module_comment_op_sup =
+		"lf_op_gcc_sup.h defines macros for each type and operation. If the macro evaluates to "
+		"0, that operation is not supported on that type for all supported architectures. "
+		"If the macro evaluates to 1, that operation is supported on that type for all supported "
+		"architectures. It is important to note that \"supported\" means implemented in a lock-free "
+		"manner. For example, DCAS could be emulated on RV32 w/ locks but that is not truly lock-free.";
+	lf_gen_header_output("liblf/tools/gen/lf_gen_gcc.c",
+			     module_comment_op_sup);
+	lf_gen_header_guard(guard_op_sup, true);
+
+	enum lf_gen_func_category func;
+	enum lf_gen_type type;
+	funcs_for_each(func) {
+		types_for_each(type) {
+			lf_gen_output_op_sup_macro(type, func,
+						   is_op_supported(func, type));
+		}
+		output("\n");
+	}
+
+	lf_gen_header_guard(guard_op_sup, false);
+}
+
+int main(int argc, char *argv[])
+{
+	if (argc < 1) {
+		abort();
+	} else if (argc == 1) {
+		fprintf(stderr, "Usage: %s <op | op_sup>\n", argv[0]);
+		return 1;
+	}
+
+	if (strcmp(argv[1], "op_sup") == 0) {
+		generate_op_sup();
+	} else if (strcmp(argv[1], "op") == 0) {
+		generate_op();
+	} else {
+		fprintf(stderr, "ERROR: Unknown argument %s\n", argv[1]);
+		fprintf(stderr, "Usage: %s <op | op_sup>\n", argv[0]);
+		return 1;
+	}
+	return 0;
 }
