@@ -4,7 +4,7 @@
 
 /* This file was automatically generated. DO NOT MODIFY IT DIRECTLY.
  *
- * Date:      2025-09-01 15:34:43
+ * Date:      2025-09-02 16:56:50
  * Generator: liblf/tools/gen/lf_gen_gcc.c
  * Version:   v0.1.0
  *
@@ -560,21 +560,21 @@ static lf_native_word lf_op_swap_native(lf_native_word *p, lf_native_word val)
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_ptr(void **p, void *val_old, void *val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_iptr(intptr_t *p, intptr_t val_old, intptr_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_uptr(uintptr_t *p, uintptr_t val_old, uintptr_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
@@ -582,7 +582,7 @@ LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_char(signed char *p, signed char val_old,
 			   signed char val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
@@ -590,14 +590,14 @@ LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_uchar(unsigned char *p, unsigned char val_old,
 			    unsigned char val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_short(short *p, short val_old, short val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
@@ -605,14 +605,14 @@ LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_ushort(unsigned short *p, unsigned short val_old,
 			     unsigned short val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_int(int *p, int val_old, int val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
@@ -620,14 +620,14 @@ LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_uint(unsigned int *p, unsigned int val_old,
 			   unsigned int val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_long(long *p, long val_old, long val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
@@ -635,70 +635,70 @@ LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_ulong(unsigned long *p, unsigned long val_old,
 			    unsigned long val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_i8(int8_t *p, int8_t val_old, int8_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_u8(uint8_t *p, uint8_t val_old, uint8_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_i16(int16_t *p, int16_t val_old, int16_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_u16(uint16_t *p, uint16_t val_old, uint16_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_i32(int32_t *p, int32_t val_old, int32_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_u32(uint32_t *p, uint32_t val_old, uint32_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_i64(int64_t *p, int64_t val_old, int64_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_u64(uint64_t *p, uint64_t val_old, uint64_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_size(size_t *p, size_t val_old, size_t val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
@@ -706,14 +706,14 @@ LF_ATTR_ALWAYS_INLINE
 static bool lf_op_cas_native(lf_native_word *p, lf_native_word val_old,
 			     lf_native_word val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, true,
+	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
 static void *lf_op_casx_ptr(void **p, void *val_old, void *val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -721,7 +721,7 @@ static void *lf_op_casx_ptr(void **p, void *val_old, void *val_new)
 LF_ATTR_ALWAYS_INLINE
 static intptr_t lf_op_casx_iptr(intptr_t *p, intptr_t val_old, intptr_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -730,7 +730,7 @@ LF_ATTR_ALWAYS_INLINE
 static uintptr_t lf_op_casx_uptr(uintptr_t *p, uintptr_t val_old,
 				 uintptr_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -739,7 +739,7 @@ LF_ATTR_ALWAYS_INLINE
 static signed char lf_op_casx_char(signed char *p, signed char val_old,
 				   signed char val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -748,7 +748,7 @@ LF_ATTR_ALWAYS_INLINE
 static unsigned char lf_op_casx_uchar(unsigned char *p, unsigned char val_old,
 				      unsigned char val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -756,7 +756,7 @@ static unsigned char lf_op_casx_uchar(unsigned char *p, unsigned char val_old,
 LF_ATTR_ALWAYS_INLINE
 static short lf_op_casx_short(short *p, short val_old, short val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -766,7 +766,7 @@ static unsigned short lf_op_casx_ushort(unsigned short *p,
 					unsigned short val_old,
 					unsigned short val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -774,7 +774,7 @@ static unsigned short lf_op_casx_ushort(unsigned short *p,
 LF_ATTR_ALWAYS_INLINE
 static int lf_op_casx_int(int *p, int val_old, int val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -783,7 +783,7 @@ LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_op_casx_uint(unsigned int *p, unsigned int val_old,
 				    unsigned int val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -791,7 +791,7 @@ static unsigned int lf_op_casx_uint(unsigned int *p, unsigned int val_old,
 LF_ATTR_ALWAYS_INLINE
 static long lf_op_casx_long(long *p, long val_old, long val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -800,7 +800,7 @@ LF_ATTR_ALWAYS_INLINE
 static unsigned long lf_op_casx_ulong(unsigned long *p, unsigned long val_old,
 				      unsigned long val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -808,7 +808,7 @@ static unsigned long lf_op_casx_ulong(unsigned long *p, unsigned long val_old,
 LF_ATTR_ALWAYS_INLINE
 static int8_t lf_op_casx_i8(int8_t *p, int8_t val_old, int8_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -816,7 +816,7 @@ static int8_t lf_op_casx_i8(int8_t *p, int8_t val_old, int8_t val_new)
 LF_ATTR_ALWAYS_INLINE
 static uint8_t lf_op_casx_u8(uint8_t *p, uint8_t val_old, uint8_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -824,7 +824,7 @@ static uint8_t lf_op_casx_u8(uint8_t *p, uint8_t val_old, uint8_t val_new)
 LF_ATTR_ALWAYS_INLINE
 static int16_t lf_op_casx_i16(int16_t *p, int16_t val_old, int16_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -832,7 +832,7 @@ static int16_t lf_op_casx_i16(int16_t *p, int16_t val_old, int16_t val_new)
 LF_ATTR_ALWAYS_INLINE
 static uint16_t lf_op_casx_u16(uint16_t *p, uint16_t val_old, uint16_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -840,7 +840,7 @@ static uint16_t lf_op_casx_u16(uint16_t *p, uint16_t val_old, uint16_t val_new)
 LF_ATTR_ALWAYS_INLINE
 static int32_t lf_op_casx_i32(int32_t *p, int32_t val_old, int32_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -848,7 +848,7 @@ static int32_t lf_op_casx_i32(int32_t *p, int32_t val_old, int32_t val_new)
 LF_ATTR_ALWAYS_INLINE
 static uint32_t lf_op_casx_u32(uint32_t *p, uint32_t val_old, uint32_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -856,7 +856,7 @@ static uint32_t lf_op_casx_u32(uint32_t *p, uint32_t val_old, uint32_t val_new)
 LF_ATTR_ALWAYS_INLINE
 static int64_t lf_op_casx_i64(int64_t *p, int64_t val_old, int64_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -864,7 +864,7 @@ static int64_t lf_op_casx_i64(int64_t *p, int64_t val_old, int64_t val_new)
 LF_ATTR_ALWAYS_INLINE
 static uint64_t lf_op_casx_u64(uint64_t *p, uint64_t val_old, uint64_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -872,7 +872,7 @@ static uint64_t lf_op_casx_u64(uint64_t *p, uint64_t val_old, uint64_t val_new)
 LF_ATTR_ALWAYS_INLINE
 static size_t lf_op_casx_size(size_t *p, size_t val_old, size_t val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }
@@ -882,7 +882,7 @@ static lf_native_word lf_op_casx_native(lf_native_word *p,
 					lf_native_word val_old,
 					lf_native_word val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, true,
+	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }

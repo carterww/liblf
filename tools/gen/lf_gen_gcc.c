@@ -122,11 +122,11 @@ static void generate_swaps(void)
 static void generate_cas(void)
 {
 	static const char *cas_impl =
-		"\treturn __atomic_compare_exchange_n(p, &val_old, val_new, true, \n"
+		"\treturn __atomic_compare_exchange_n(p, &val_old, val_new, false, \n"
 		"\t\t__ATOMIC_RELAXED, __ATOMIC_RELAXED);";
 
 	static const char *casx_impl =
-		"\t(void)__atomic_compare_exchange_n(p, &val_old, val_new, true, \n"
+		"\t(void)__atomic_compare_exchange_n(p, &val_old, val_new, false, \n"
 		"\t\t__ATOMIC_RELAXED, __ATOMIC_RELAXED);\n"
 		"\treturn val_old;";
 
