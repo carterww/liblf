@@ -131,6 +131,21 @@ static void lf_gen_module_comment(const char *comment)
 	string_destroy(&s);
 }
 
+static void lf_gen_header_guard(const char *name, bool start)
+{
+	if (start) {
+		output("#ifndef ");
+		output(name);
+		output("\n#define ");
+		output(name);
+		output("\n\n");
+	} else {
+		output("#endif /* ");
+		output(name);
+		output(" */\n");
+	}
+}
+
 static void lf_gen_header_output(const char *generator_name,
 				 const char *extra_comment)
 {

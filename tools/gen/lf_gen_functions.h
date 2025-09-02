@@ -12,6 +12,10 @@
 
 static const char *func_prefix = "LF_ATTR_ALWAYS_INLINE\nstatic ";
 
+#define funcs_for_each(func_enum_var) \
+	for (func_enum_var = LF_GEN_FUNC_LOAD; \
+	     func_enum_var < LF_GEN_FUNC_COUNT; ++func_enum_var)
+
 #define funcs_faops_for_each(func_enum_var)     \
 	for (func_enum_var = LF_GEN_FUNC_FAINC; \
 	     func_enum_var <= LF_GEN_FUNC_FAXOR; ++func_enum_var)
@@ -49,6 +53,11 @@ enum lf_gen_func_category {
 	LF_GEN_FUNC_BTR,
 	LF_GEN_FUNC_COUNT,
 };
+
+static bool lf_gen_func_is_integral_only(enum lf_gen_func_category cat)
+{
+	return cat >= LF_GEN_FUNC_INC;
+}
 
 static const char *lf_gen_func_category_namespaces[] = {
 	[LF_GEN_FUNC_FENCE] = "lf_fence_",

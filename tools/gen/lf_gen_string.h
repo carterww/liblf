@@ -67,9 +67,22 @@ static void string_append_raw(string *s1, const char *s2, size_t s2_len)
 	s1->buffer[s1->len] = '\0';
 }
 
+static void string_append_char(string *s1, char c)
+{
+	string_append_raw(s1, &c, 1);
+}
+
 static void string_append(string *s1, const string *s2)
 {
 	string_append_raw(s1, s2->buffer, s2->len);
+}
+
+static char char_to_upper(char c)
+{
+	if (c >= 'a' && c <= 'z') {
+		c -= 'a' - 'A';
+	}
+	return c;
 }
 
 #endif /* LF_GEN_STRING_H */

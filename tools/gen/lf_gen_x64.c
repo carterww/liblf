@@ -12,9 +12,8 @@
 #include "lf_gen_types.h"
 #include <string.h>
 
-static const char *guard_start = "#ifndef LF_OP_X64_H\n"
-				 "#define LF_OP_X64_H\n\n";
-static const char *guard_end = "#endif /* LF_OP_X64_H */\n";
+static const char *guard_op = "LF_OP_X64_H";
+static const char *guard_op_sup = "LF_OP_X64_SUP_H";
 
 static const char *includes = "#include <stdbool.h>\n"
 			      "#include <stddef.h>\n"
@@ -781,15 +780,15 @@ static void generate_dcas(void)
 				  lf_gen_func_dcasx_define);
 }
 
-int main(void)
+static void generate_op(void)
 {
-	static const char *module_comment =
+	static const char *module_comment_op =
 		"lf_op_x64.h implements many atomic and lock-free related functions in "
 		"x86 assembly, specifically x86_64 assembly. You should not include this file directly, but "
 		"you can if you want to use the x64 functions directly. If you want to let liblf "
 		"decide, include lf_op.h instead.";
-	lf_gen_header_output("liblf/tools/gen/lf_gen_x64.c", module_comment);
-	output(guard_start);
+	lf_gen_header_output("liblf/tools/gen/lf_gen_x64.c", module_comment_op);
+	lf_gen_header_guard(guard_op, true);
 	output(includes);
 
 	/* Normal stuff */
@@ -807,5 +806,80 @@ int main(void)
 	/* Double width CAS */
 	generate_dcas();
 
-	output(guard_end);
+	lf_gen_header_guard(guard_op, false);
+}
+
+static void generate_op_sup_macro(enum lf_gen_type type,
+				    enum lf_gen_func_category func,
+				    bool supported)
+{
+	TYPE_NAME_VARS(type);
+	NAMESPACE_VAR(func);
+
+	string s;
+	string_init(&s, 64);
+	string_append_raw(&s, "#define ", 8);
+	for (size_t i = 0; i < strlen(namespace); ++i) {
+		char c = char_to_upper(namespace[i]);
+		string_append_char(&s, c);
+	}
+	for (size_t i = 0; i < strlen(type_alias); ++i) {
+		char c = char_to_upper(type_alias[i]);
+		string_append_char(&s, c);
+	}
+	if (supported) {
+		string_append_raw(&s, "_SUP 1\n", 7);
+	} else {
+		string_append_raw(&s, "_SUP 0\n", 7);
+	}
+	output(s.buffer);
+	string_destroy(&s);
+}
+
+static void generate_op_sup(void)
+{
+	static const char *module_comment_op_sup =
+		"lf_op_x64_sup.h defines macros for each type and operation. If the macro evaluates to "
+		"0, that operation is not supported on that type for x64. If the macro evaluates to 1, that "
+		"operation is supported on that type for x64. This header is important if you plan to target "
+		"multiple architectures because not all architectures support operations on all types. For exmaple, "
+		"x64 defines dcas on uint64_t but x86 does not. You should "
+		"use these macros if you suspect some architectures you suppport will not implement certain operations.";
+	lf_gen_header_output("liblf/tools/gen/lf_gen_x64.c",
+			     module_comment_op_sup);
+	lf_gen_header_guard(guard_op_sup, true);
+
+	enum lf_gen_func_category func;
+	enum lf_gen_type type;
+	funcs_for_each(func) {
+		bool integral_only_func = lf_gen_func_is_integral_only(func);
+		types_for_each(type) {
+			bool supported = !integral_only_func || type != LF_GEN_TYPE_PTR;
+			generate_op_sup_macro(type, func, supported);
+		}
+		output("\n");
+	}
+
+	lf_gen_header_guard(guard_op_sup, false);
+}
+
+int main(int argc, char *argv[])
+{
+	if (argc < 1) {
+		abort();
+	} else if (argc == 1) {
+		fprintf(stderr, "Usage: %s <op | op_sup>\n", argv[0]);
+		return 1;
+	}
+
+	if (strcmp(argv[1], "op_sup") == 0) {
+		generate_op_sup();
+	} else if (strcmp(argv[1], "op") == 0) {
+		generate_op();
+	} else {
+		fprintf(stderr, "ERROR: Unknown argument %s\n", argv[1]);
+		fprintf(stderr, "Usage: %s <op | op_sup>\n", argv[0]);
+		return 1;
+	}
+	return 0;
 }

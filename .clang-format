@@ -71,6 +71,7 @@ ForEachMacros:
   - 'fence_base_for_each'
   - 'fence_force_for_each'
   - 'fence_other_for_each'
+  - 'funcs_for_each'
   - 'funcs_faops_for_each'
   - 'funcs_ops_for_each'
 
