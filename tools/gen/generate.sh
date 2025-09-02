@@ -13,3 +13,5 @@ GEN_DIR="$INCLUDE_DIR/../tools/gen"
 
 $GEN_DIR/lf_gen_gcc op | clang-format -style=file > $INCLUDE_DIR/lf/gcc/lf_op_gcc.h
 $GEN_DIR/lf_gen_x64 op | clang-format -style=file > $INCLUDE_DIR/lf/gcc/lf_op_x64.h
+$GEN_DIR/lf_gen_gcc op_sup | clang-format -style=file > $INCLUDE_DIR/lf/gcc/lf_op_gcc_sup.h
+$GEN_DIR/lf_gen_x64 op_sup | clang-format -style=file > $INCLUDE_DIR/lf/gcc/lf_op_x64_sup.h
