@@ -28,6 +28,8 @@ enum lf_gen_func_category {
 	LF_GEN_FUNC_SWAP,
 	LF_GEN_FUNC_CAS,
 	LF_GEN_FUNC_CASX,
+	LF_GEN_FUNC_DCAS,
+	LF_GEN_FUNC_DCASX,
 	LF_GEN_FUNC_INC,
 	LF_GEN_FUNC_DEC,
 	LF_GEN_FUNC_ADD,
@@ -55,6 +57,8 @@ static const char *lf_gen_func_category_namespaces[] = {
 	[LF_GEN_FUNC_SWAP] = "lf_op_swap_",
 	[LF_GEN_FUNC_CAS] = "lf_op_cas_",
 	[LF_GEN_FUNC_CASX] = "lf_op_casx_",
+	[LF_GEN_FUNC_DCAS] = "lf_op_dcas_",
+	[LF_GEN_FUNC_DCASX] = "lf_op_dcasx_",
 	[LF_GEN_FUNC_INC] = "lf_op_inc_",
 	[LF_GEN_FUNC_DEC] = "lf_op_dec_",
 	[LF_GEN_FUNC_ADD] = "lf_op_add_",
@@ -123,7 +127,8 @@ static const char *lf_gen_func_fence_names[] = {
 	[LF_GEN_FUNC_FENCE_STORE_ATOMIC] = "store_atomic"
 };
 
-static string lf_gen_func_get_name(enum lf_gen_type type, enum lf_gen_func_category cat)
+static string lf_gen_func_get_name(enum lf_gen_type type,
+				   enum lf_gen_func_category cat)
 {
 	string s;
 	const char *namespace = lf_gen_func_category_namespaces[cat];
@@ -356,6 +361,46 @@ static string lf_gen_func_bitop_define(enum lf_gen_type type,
 	param_types[0] = type_name_ptr;
 	return lf_gen_func_define("bool", namespace, type_alias, param_types,
 				  param_names, 2, impl);
+}
+
+static string lf_gen_func_dcas_define(enum lf_gen_type type, const char *impl)
+{
+	static const char *param_names[3] = { "p", "val_old", "val_new" };
+	const char *param_types[3] = { NULL, NULL, NULL };
+	string union_type_ptr = lf_gen_type_dcas_name(type, true);
+	string union_type = lf_gen_type_dcas_name(type, false);
+	TYPE_NAME_VARS(type);
+	NAMESPACE_VAR(LF_GEN_FUNC_DCAS);
+	param_types[0] = union_type_ptr.buffer;
+	param_types[1] = union_type.buffer;
+	param_types[2] = union_type.buffer;
+
+	string result = lf_gen_func_define("bool", namespace, type_alias,
+					   param_types, param_names, 3, impl);
+	string_destroy(&union_type_ptr);
+	string_destroy(&union_type);
+	return result;
+}
+
+static string lf_gen_func_dcasx_define(enum lf_gen_type type, const char *impl)
+{
+	static const char *param_names[4] = { "p", "val_old", "val_new",
+					      "success" };
+	const char *param_types[4] = { NULL, NULL, NULL, "bool *" };
+	string union_type_ptr = lf_gen_type_dcas_name(type, true);
+	string union_type = lf_gen_type_dcas_name(type, false);
+	TYPE_NAME_VARS(type);
+	NAMESPACE_VAR(LF_GEN_FUNC_DCASX);
+	param_types[0] = union_type_ptr.buffer;
+	param_types[1] = union_type.buffer;
+	param_types[2] = union_type.buffer;
+
+	string result = lf_gen_func_define(union_type.buffer, namespace,
+					   type_alias, param_types, param_names,
+					   4, impl);
+	string_destroy(&union_type_ptr);
+	string_destroy(&union_type);
+	return result;
 }
 
 #endif /* LF_GEN_FUNCTIONS_H */

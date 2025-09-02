@@ -5,6 +5,11 @@
 #ifndef LF_GEN_TYPES_H
 #define LF_GEN_TYPES_H
 
+#include <stdio.h>
+#include <string.h>
+
+#include "lf_gen_string.h"
+
 #define types_for_each(type_enum_var)         \
 	for (type_enum_var = LF_GEN_TYPE_PTR; \
 	     type_enum_var < LF_GEN_TYPE_COUNT; ++type_enum_var)
@@ -100,5 +105,65 @@ static const char *lf_gen_type_alias[] = {
 	[LF_GEN_TYPE_U64] = "u64",	 [LF_GEN_TYPE_SIZE] = "size",
 	[LF_GEN_TYPE_NATIVE] = "native"
 };
+
+static string lf_gen_type_dcas_name(enum lf_gen_type type, bool ptr)
+{
+	static const char *dcas_type_namespace = "lf_dcas_packed_";
+	string s;
+	const char *alias = lf_gen_type_alias[type];
+	size_t alen = strlen(alias);
+	size_t nlen = strlen(dcas_type_namespace);
+	string_init(&s, alen + nlen + 3);
+	string_append_raw(&s, dcas_type_namespace, nlen);
+	string_append_raw(&s, alias, alen);
+	if (ptr) {
+		string_append_raw(&s, " *", 2);
+	}
+	return s;
+}
+
+static string lf_gen_type_dcas_typedef(enum lf_gen_type type)
+{
+	string s;
+	string name = lf_gen_type_dcas_name(type, false);
+	string_init(&s, 20 + name.len * 2);
+	string_append_raw(&s, "typedef union ", 14);
+	string_append(&s, &name);
+	string_append_raw(&s, " ", 1);
+	string_append(&s, &name);
+	string_append_raw(&s, ";\n", 2);
+	string_destroy(&name);
+	return s;
+}
+
+static string lf_gen_type_dcas_define(enum lf_gen_type type,
+				      enum lf_gen_type type_double_width,
+				      size_t type_double_alignment)
+{
+	string s;
+	char buf[128] = { 0 };
+	string union_name = lf_gen_type_dcas_name(type, false);
+	const char *raw_type_name = lf_gen_type_names[type];
+	string_init(&s, 128);
+
+	snprintf(buf, 128, "union %s {\n", union_name.buffer);
+	string_append_raw(&s, buf, 0);
+
+	if (type_double_width != LF_GEN_TYPE_COUNT) {
+		snprintf(buf, 128, "\t%s%sscalar;\n",
+			 lf_gen_type_names[type_double_width],
+			 type_double_width == LF_GEN_TYPE_PTR ? "" : " ");
+		string_append_raw(&s, buf, 0);
+	}
+	snprintf(buf, 128, "\t%s%stuple[2];\n", raw_type_name,
+		 type_double_width == LF_GEN_TYPE_PTR ? "" : " ");
+	string_append_raw(&s, buf, 0);
+	snprintf(buf, 128, "} LF_ATTR_ALIGNED(%zu);\n",
+		 type_double_alignment);
+	string_append_raw(&s, buf, 0);
+
+	string_destroy(&union_name);
+	return s;
+}
 
 #endif /* LF_GEN_TYPES_H */

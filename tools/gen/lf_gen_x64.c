@@ -97,6 +97,32 @@ static const size_t lf_gen_x64_type_to_size[] = {
 	[LF_GEN_TYPE_NATIVE] = 8,
 };
 
+static const size_t *lf_gen_x64_type_to_alignment = lf_gen_x64_type_to_size;
+
+static const enum lf_gen_type lf_gen_x64_type_to_double_width_type[] = {
+	[LF_GEN_TYPE_PTR] = LF_GEN_TYPE_COUNT,
+	[LF_GEN_TYPE_IPTR] = LF_GEN_TYPE_COUNT,
+	[LF_GEN_TYPE_UPTR] = LF_GEN_TYPE_COUNT,
+	[LF_GEN_TYPE_CHAR] = LF_GEN_TYPE_U16,
+	[LF_GEN_TYPE_UCHAR] = LF_GEN_TYPE_U16,
+	[LF_GEN_TYPE_SHORT] = LF_GEN_TYPE_U32,
+	[LF_GEN_TYPE_USHORT] = LF_GEN_TYPE_U32,
+	[LF_GEN_TYPE_INT] = LF_GEN_TYPE_U64,
+	[LF_GEN_TYPE_UINT] = LF_GEN_TYPE_U64,
+	[LF_GEN_TYPE_LONG] = LF_GEN_TYPE_COUNT,
+	[LF_GEN_TYPE_ULONG] = LF_GEN_TYPE_COUNT,
+	[LF_GEN_TYPE_I8] = LF_GEN_TYPE_I16,
+	[LF_GEN_TYPE_U8] = LF_GEN_TYPE_U16,
+	[LF_GEN_TYPE_I16] = LF_GEN_TYPE_I32,
+	[LF_GEN_TYPE_U16] = LF_GEN_TYPE_U32,
+	[LF_GEN_TYPE_I32] = LF_GEN_TYPE_I64,
+	[LF_GEN_TYPE_U32] = LF_GEN_TYPE_U64,
+	[LF_GEN_TYPE_I64] = LF_GEN_TYPE_COUNT,
+	[LF_GEN_TYPE_U64] = LF_GEN_TYPE_COUNT,
+	[LF_GEN_TYPE_SIZE] = LF_GEN_TYPE_COUNT,
+	[LF_GEN_TYPE_NATIVE] = LF_GEN_TYPE_COUNT,
+};
+
 static const char lf_gen_x64_size_to_suffix[] = {
 	[1] = 'b',
 	[2] = 'w',
@@ -276,7 +302,7 @@ static string generate_cas_impl(enum lf_gen_type type)
 		": 'memory', 'cc'";
 
 	/* Declare the zero flag variable */
-	string_append_raw(&s, "\tbool zf;\n", 0);
+	lf_gen_declare_var_str_type(&s, "bool", "zf", 1);
 	append_inline_asm(&s, type, asm_cas_x64, true);
 	/* Return the zero flag*/
 	lf_gen_return(&s, "zf", 1);
@@ -492,6 +518,134 @@ static string generate_btops_impl(enum lf_gen_type type,
 	return s;
 }
 
+static string generate_dcas_from_cas_impl(enum lf_gen_type type,
+					  enum lf_gen_type type_double_width)
+{
+	string s;
+	(void)type;
+	const char *tdw_cas_ns =
+		lf_gen_func_category_namespaces[LF_GEN_FUNC_CAS];
+	const char *tdw_alias = lf_gen_type_alias[type_double_width];
+	string_init(&s, 128);
+
+	string_append_raw(&s, "\treturn ", 8);
+	string_append_raw(&s, tdw_cas_ns, 0);
+	string_append_raw(&s, tdw_alias, 0);
+	string_append_raw(&s, "(&p->scalar, val_old.scalar, val_new.scalar);",
+			  0);
+
+	return s;
+}
+
+static string generate_dcasx_from_casx_impl(enum lf_gen_type type,
+					    enum lf_gen_type type_double_width)
+{
+	string s;
+	const char *tdw_cas_ns =
+		lf_gen_func_category_namespaces[LF_GEN_FUNC_CASX];
+	const char *tdw_alias = lf_gen_type_alias[type_double_width];
+	string union_name = lf_gen_type_dcas_name(type, false);
+	string_init(&s, 256);
+
+	lf_gen_declare_var_str_type(&s, union_name.buffer, "val_orig", 1);
+	string_append_raw(&s, "\tval_orig.scalar = ", 0);
+	string_append_raw(&s, tdw_cas_ns, 0);
+	string_append_raw(&s, tdw_alias, 0);
+	string_append_raw(&s, "(&p->scalar, val_old.scalar, val_new.scalar);\n",
+			  0);
+	string_append_raw(
+		&s, "\t*success = val_orig.scalar == val_old.scalar;\n", 0);
+	lf_gen_return(&s, "val_orig", 1);
+
+	string_destroy(&union_name);
+	return s;
+}
+
+static string generate_dcas_impl(enum lf_gen_type type)
+{
+	enum lf_gen_type type_double_width =
+		lf_gen_x64_type_to_double_width_type[type];
+	/* Use a normal CAS if double width type natively exists */
+	if (type_double_width != LF_GEN_TYPE_COUNT) {
+		return generate_dcas_from_cas_impl(type, type_double_width);
+	}
+	static const char *asm_dcas16b_x64 =
+		"'lock cmpxchg16b %0'\n"
+		": '+m'(*p->tuple), '=@ccz'(zf),\n"
+		"  '+a'(val_old.tuple[0]),\n"
+		"  '+d'(val_old.tuple[1])\n"
+		": 'b'(val_new.tuple[0]), 'c'(val_new.tuple[1])\n"
+		": 'memory', 'cc'";
+	/* Use lock cmpxchg16b */
+	string s;
+	string_init(&s, 256);
+	lf_gen_declare_var_str_type(&s, "bool", "zf", 1);
+	append_inline_asm(&s, type, asm_dcas16b_x64, true);
+	lf_gen_return(&s, "zf", 1);
+	return s;
+}
+
+static string generate_dcasx_impl(enum lf_gen_type type)
+{
+	enum lf_gen_type type_double_width =
+		lf_gen_x64_type_to_double_width_type[type];
+	/* Use a normal CAS if double width type natively exists */
+	if (type_double_width != LF_GEN_TYPE_COUNT) {
+		return generate_dcasx_from_casx_impl(type, type_double_width);
+	}
+	static const char *asm_dcasx16b_x64 =
+		"'lock cmpxchg16b %0'\n"
+		": '+m'(*p->tuple), '=@ccz'(*success),\n"
+		"  '+a'(val_old.tuple[0]),\n"
+		"  '+d'(val_old.tuple[1])\n"
+		": 'b'(val_new.tuple[0]), 'c'(val_new.tuple[1])\n"
+		": 'memory', 'cc'";
+	/* Use lock cmpxchg16b */
+	string s;
+	string_init(&s, 256);
+	append_inline_asm(&s, type, asm_dcasx16b_x64, true);
+	lf_gen_return(&s, "val_old", 1);
+	return s;
+}
+
+static void generate_dcas_packed_types(void)
+{
+	static const char *dcas_packed_types_comment =
+		"I was (and still am) unsure what the best approach to DCAS's interface is. I grappled between "
+		"uint32_t *, uint32_t[2], and a union of uint64_t & uint32_t[2] (using dcas_u32 as an example). "
+		"In the end, I decide on the union approach for a few reasons:\n"
+		"- It bakes alignment into the type. You can't accidentally pass a uint32_t *\n"
+		"  that isn't 8 byte aligned.\n"
+		"- It makes returning the original value from casx simpler.\n"
+		"- Using a union allows us to following strict aliasing rules without using\n"
+		"  the __may_alias__ builtins.";
+
+	string comment = lf_gen_format_comment(dcas_packed_types_comment, 0, 8,
+					       false, false);
+	output(comment.buffer);
+	string_destroy(&comment);
+
+	enum lf_gen_type type;
+	types_for_each(type) {
+		string typedef_line = lf_gen_type_dcas_typedef(type);
+		output(typedef_line.buffer);
+		string_destroy(&typedef_line);
+	}
+	output("\n");
+
+	types_for_each(type) {
+		enum lf_gen_type type_double_width =
+			lf_gen_x64_type_to_double_width_type[type];
+		size_t type_double_alignment =
+			lf_gen_x64_type_to_alignment[type] * 2;
+		string type_definition = lf_gen_type_dcas_define(
+			type, type_double_width, type_double_alignment);
+		output(type_definition.buffer);
+		string_destroy(&type_definition);
+	}
+	output("\n");
+}
+
 static void generate_fences(void)
 {
 	enum lf_gen_func_fence fence;
@@ -619,17 +773,26 @@ static void generate_btops(void)
 				       lf_gen_func_bitop_define);
 }
 
+static void generate_dcas(void)
+{
+	generate_dcas_packed_types();
+	lf_gen_all_impl_from_func(generate_dcas_impl, lf_gen_func_dcas_define);
+	lf_gen_all_impl_from_func(generate_dcasx_impl,
+				  lf_gen_func_dcasx_define);
+}
+
 int main(void)
 {
 	static const char *module_comment =
 		"lf_op_x64.h implements many atomic and lock-free related functions in "
-		"x86 assembly, specifically for x86_64. You should not include this file directly, but "
+		"x86 assembly, specifically x86_64 assembly. You should not include this file directly, but "
 		"you can if you want to use the x64 functions directly. If you want to let liblf "
 		"decide, include lf_op.h instead.";
 	lf_gen_header_output("liblf/tools/gen/lf_gen_x64.c", module_comment);
 	output(guard_start);
 	output(includes);
 
+	/* Normal stuff */
 	generate_fences();
 	generate_loads();
 	generate_stores();
@@ -640,6 +803,9 @@ int main(void)
 	generate_adds_subs();
 	generate_and_or_xor();
 	generate_btops();
+
+	/* Double width CAS */
+	generate_dcas();
 
 	output(guard_end);
 }
