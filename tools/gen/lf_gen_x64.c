@@ -5,12 +5,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "lf_gen_common.h"
 #include "lf_gen_functions.h"
 #include "lf_gen_string.h"
 #include "lf_gen_types.h"
-#include <string.h>
 
 static const char *guard_op = "LF_OP_X64_H";
 static const char *guard_op_sup = "LF_OP_X64_SUP_H";
