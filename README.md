@@ -65,7 +65,7 @@ liblf provides a set of type-safe atomic operations for almost any standard type
 care about. Currently, I only provide two implementations: one that uses GCC builtins
 and another that uses hand-tuned x86_64 ASM. Here are the types that liblf natively
 supports:
-- void * (Only load, store, swap, cas, and casx are implemented)
+- void *
 - intptr_t, uintptr_t
 - signed char, unsigned char
 - short, unsigned short
