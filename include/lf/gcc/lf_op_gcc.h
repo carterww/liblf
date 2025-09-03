@@ -4,7 +4,7 @@
 
 /* This file was automatically generated. DO NOT MODIFY IT DIRECTLY.
  *
- * Date:      2025-09-02 16:56:50
+ * Date:      2025-09-02 23:01:05
  * Generator: liblf/tools/gen/lf_gen_gcc.c
  * Version:   v0.1.0
  *
@@ -180,9 +180,9 @@ static void lf_fence_store_atomic(void)
 #endif /* LF_MEM_TSO or LF_MEM_WMO */
 
 LF_ATTR_ALWAYS_INLINE
-static void *lf_op_load_ptr(void **p)
+static void *lf_op_load_ptr(void *p)
 {
-	return __atomic_load_n(p, __ATOMIC_RELAXED);
+	return __atomic_load_n((void **)p, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
@@ -306,9 +306,9 @@ static lf_native_word lf_op_load_native(lf_native_word *p)
 }
 
 LF_ATTR_ALWAYS_INLINE
-static void lf_op_store_ptr(void **p, void *val)
+static void lf_op_store_ptr(void *p, void *val)
 {
-	__atomic_store_n(p, val, __ATOMIC_RELAXED);
+	__atomic_store_n((void **)p, val, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
@@ -432,9 +432,9 @@ static void lf_op_store_native(lf_native_word *p, lf_native_word val)
 }
 
 LF_ATTR_ALWAYS_INLINE
-static void *lf_op_swap_ptr(void **p, void *val)
+static void *lf_op_swap_ptr(void *p, void *val)
 {
-	return __atomic_exchange_n(p, val, __ATOMIC_RELAXED);
+	return __atomic_exchange_n((void **)p, val, __ATOMIC_RELAXED);
 }
 
 LF_ATTR_ALWAYS_INLINE
@@ -558,9 +558,9 @@ static lf_native_word lf_op_swap_native(lf_native_word *p, lf_native_word val)
 }
 
 LF_ATTR_ALWAYS_INLINE
-static bool lf_op_cas_ptr(void **p, void *val_old, void *val_new)
+static bool lf_op_cas_ptr(void *p, void *val_old, void *val_new)
 {
-	return __atomic_compare_exchange_n(p, &val_old, val_new, false,
+	return __atomic_compare_exchange_n((void **)p, &val_old, val_new, false,
 					   __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 }
 
@@ -711,9 +711,9 @@ static bool lf_op_cas_native(lf_native_word *p, lf_native_word val_old,
 }
 
 LF_ATTR_ALWAYS_INLINE
-static void *lf_op_casx_ptr(void **p, void *val_old, void *val_new)
+static void *lf_op_casx_ptr(void *p, void *val_old, void *val_new)
 {
-	(void)__atomic_compare_exchange_n(p, &val_old, val_new, false,
+	(void)__atomic_compare_exchange_n((void **)p, &val_old, val_new, false,
 					  __ATOMIC_RELAXED, __ATOMIC_RELAXED);
 	return val_old;
 }

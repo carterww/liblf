@@ -242,6 +242,28 @@ static void append_inline_asm(string *s, enum lf_gen_type type,
 	}
 }
 
+static void append_inline_asm_fix_ptr_deref(string *s, enum lf_gen_type type,
+					    const char *body, bool new_line)
+{
+	if (type == LF_GEN_TYPE_PTR) {
+		string ptr_impl;
+		string_init(&ptr_impl, 128);
+		/* This is so lazy of me */
+		for (size_t i = 0; i < strlen(body) - 1; ++i) {
+			if (body[i] == '*' && body[i + 1] == 'p') {
+				string_append_raw(&ptr_impl, "*(void **)", 10);
+				string_append_raw(&ptr_impl, &body[i + 1], 0);
+				break;
+			}
+			string_append_char(&ptr_impl, body[i]);
+		}
+		append_inline_asm(s, type, ptr_impl.buffer, new_line);
+		string_destroy(&ptr_impl);
+		return;
+	}
+	append_inline_asm(s, type, body, new_line);
+}
+
 static string generate_load_impl(enum lf_gen_type type)
 {
 	string s;
@@ -254,7 +276,7 @@ static string generate_load_impl(enum lf_gen_type type)
 
 	/* Declare the variable we load into */
 	lf_gen_declare_var(&s, type, "val", 1);
-	append_inline_asm(&s, type, asm_load_x64, true);
+	append_inline_asm_fix_ptr_deref(&s, type, asm_load_x64, true);
 	lf_gen_return(&s, "val", 1);
 
 	return s;
@@ -269,7 +291,7 @@ static string generate_store_impl(enum lf_gen_type type)
 					   ": 'r'(val)\n"
 					   ": 'memory'";
 
-	append_inline_asm(&s, type, asm_store_x64, false);
+	append_inline_asm_fix_ptr_deref(&s, type, asm_store_x64, false);
 
 	return s;
 }
@@ -283,7 +305,7 @@ static string generate_swap_impl(enum lf_gen_type type)
 					  ":\n"
 					  ": 'memory'";
 
-	append_inline_asm(&s, type, asm_swap_x64, true);
+	append_inline_asm_fix_ptr_deref(&s, type, asm_swap_x64, true);
 	/* Return the val that was swapped with *p */
 	lf_gen_return(&s, "val", 1);
 
@@ -302,7 +324,7 @@ static string generate_cas_impl(enum lf_gen_type type)
 
 	/* Declare the zero flag variable */
 	lf_gen_declare_var_str_type(&s, "bool", "zf", 1);
-	append_inline_asm(&s, type, asm_cas_x64, true);
+	append_inline_asm_fix_ptr_deref(&s, type, asm_cas_x64, true);
 	/* Return the zero flag*/
 	lf_gen_return(&s, "zf", 1);
 
@@ -319,7 +341,7 @@ static string generate_casx_impl(enum lf_gen_type type)
 					  ": 'r'(val_new)\n"
 					  ": 'memory', 'cc'";
 
-	append_inline_asm(&s, type, asm_casx_x64, true);
+	append_inline_asm_fix_ptr_deref(&s, type, asm_casx_x64, true);
 	/* Return the original value of p */
 	lf_gen_return(&s, "val_old", 1);
 

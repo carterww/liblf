@@ -4,7 +4,7 @@
 
 /* This file was automatically generated. DO NOT MODIFY IT DIRECTLY.
  *
- * Date:      2025-09-02 15:05:37
+ * Date:      2025-09-02 23:01:44
  * Generator: liblf/tools/gen/lf_gen_x64.c
  * Version:   v0.1.0
  *
@@ -130,10 +130,13 @@ static void lf_fence_store_atomic(void)
 }
 
 LF_ATTR_ALWAYS_INLINE
-static void *lf_op_load_ptr(void **p)
+static void *lf_op_load_ptr(void *p)
 {
 	void *val;
-	__asm__ __volatile__("movq %1, %0" : "=r"(val) : "m"(*p) : "memory");
+	__asm__ __volatile__("movq %1, %0"
+			     : "=r"(val)
+			     : "m"(*(void **)p)
+			     : "memory");
 	return val;
 }
 
@@ -298,9 +301,12 @@ static lf_native_word lf_op_load_native(lf_native_word *p)
 }
 
 LF_ATTR_ALWAYS_INLINE
-static void lf_op_store_ptr(void **p, void *val)
+static void lf_op_store_ptr(void *p, void *val)
 {
-	__asm__ __volatile__("movq %1, %0" : "=m"(*p) : "r"(val) : "memory");
+	__asm__ __volatile__("movq %1, %0"
+			     : "=m"(*(void **)p)
+			     : "r"(val)
+			     : "memory");
 }
 
 LF_ATTR_ALWAYS_INLINE
@@ -424,10 +430,10 @@ static void lf_op_store_native(lf_native_word *p, lf_native_word val)
 }
 
 LF_ATTR_ALWAYS_INLINE
-static void *lf_op_swap_ptr(void **p, void *val)
+static void *lf_op_swap_ptr(void *p, void *val)
 {
 	__asm__ __volatile__("lock xchgq %0, %1"
-			     : "+r"(val), "+m"(*p)
+			     : "+r"(val), "+m"(*(void **)p)
 			     :
 			     : "memory");
 	return val;
@@ -644,11 +650,11 @@ static lf_native_word lf_op_swap_native(lf_native_word *p, lf_native_word val)
  */
 
 LF_ATTR_ALWAYS_INLINE
-static bool lf_op_cas_ptr(void **p, void *val_old, void *val_new)
+static bool lf_op_cas_ptr(void *p, void *val_old, void *val_new)
 {
 	bool zf;
 	__asm__ __volatile__("lock cmpxchgq %3, %0"
-			     : "+m"(*p), "=@ccz"(zf), "+a"(val_old)
+			     : "+m"(*(void **)p), "=@ccz"(zf), "+a"(val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
 	return zf;
@@ -881,10 +887,10 @@ static bool lf_op_cas_native(lf_native_word *p, lf_native_word val_old,
 }
 
 LF_ATTR_ALWAYS_INLINE
-static void *lf_op_casx_ptr(void **p, void *val_old, void *val_new)
+static void *lf_op_casx_ptr(void *p, void *val_old, void *val_new)
 {
 	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+			     : "+m"(*(void **)p), "+a"(val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
 	return val_old;

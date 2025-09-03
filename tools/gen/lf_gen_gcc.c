@@ -97,25 +97,53 @@ static void generate_fences(void)
 	output("#endif /* LF_MEM_TSO or LF_MEM_WMO */\n\n");
 }
 
+static void generate_all_cast_ptr(const char *impl,
+				  string (*func)(enum lf_gen_type,
+						 const char *))
+{
+	string ptr_impl;
+	string_init(&ptr_impl, 128);
+
+	for (size_t i = 0; i < strlen(impl) - 1; ++i) {
+		if (impl[i] == '(' && impl[i + 1] == 'p') {
+			string_append_raw(&ptr_impl, "((void **)", 10);
+			string_append_raw(&ptr_impl, &impl[i + 1], 0);
+			break;
+		}
+		string_append_char(&ptr_impl, impl[i]);
+	}
+	string s = func(LF_GEN_TYPE_PTR, ptr_impl.buffer);
+	output(s.buffer);
+	string_destroy(&ptr_impl);
+	string_destroy(&s);
+
+	enum lf_gen_type type;
+	types_integral_for_each(type) {
+		s = func(type, impl);
+		output(s.buffer);
+		string_destroy(&s);
+	}
+}
+
 static void generate_loads(void)
 {
 	static const char *impl =
 		"\treturn __atomic_load_n(p, __ATOMIC_RELAXED);";
-	lf_gen_all_same_impl(impl, lf_gen_func_load_define);
+	generate_all_cast_ptr(impl, lf_gen_func_load_define);
 }
 
 static void generate_stores(void)
 {
 	static const char *impl =
 		"\t__atomic_store_n(p, val, __ATOMIC_RELAXED);";
-	lf_gen_all_same_impl(impl, lf_gen_func_store_define);
+	generate_all_cast_ptr(impl, lf_gen_func_store_define);
 }
 
 static void generate_swaps(void)
 {
 	static const char *impl =
 		"\treturn __atomic_exchange_n(p, val, __ATOMIC_RELAXED);";
-	lf_gen_all_same_impl(impl, lf_gen_func_swap_define);
+	generate_all_cast_ptr(impl, lf_gen_func_swap_define);
 }
 
 static void generate_cas(void)
@@ -129,8 +157,8 @@ static void generate_cas(void)
 		"\t\t__ATOMIC_RELAXED, __ATOMIC_RELAXED);\n"
 		"\treturn val_old;";
 
-	lf_gen_all_same_impl(cas_impl, lf_gen_func_cas_define);
-	lf_gen_all_same_impl(casx_impl, lf_gen_func_casx_define);
+	generate_all_cast_ptr(cas_impl, lf_gen_func_cas_define);
+	generate_all_cast_ptr(casx_impl, lf_gen_func_casx_define);
 }
 
 static void generate_faop_impl(enum lf_gen_type type,

@@ -69,7 +69,7 @@ static const char *lf_gen_type_names[] = {
 };
 
 static const char *lf_gen_type_name_ptrs[] = {
-	[LF_GEN_TYPE_PTR] = "void **",
+	[LF_GEN_TYPE_PTR] = "void *",
 	[LF_GEN_TYPE_IPTR] = "intptr_t *",
 	[LF_GEN_TYPE_UPTR] = "uintptr_t *",
 	[LF_GEN_TYPE_CHAR] = "signed char *",
