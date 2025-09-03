@@ -2,6 +2,9 @@
  * Copyright (c) 2025 Carter Williams
  */
 
+#ifndef LF_OP_H
+#define LF_OP_H
+
 #include <lf_cc.h>
 #include <lf_platform.h>
 
@@ -17,3 +20,5 @@
 #else
 #error liblf requires GCC or Clang because it uses inline asm and gcc builtins
 #endif /* CC */
+
+#endif /* LF_OP_H */
