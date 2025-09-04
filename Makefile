@@ -2,7 +2,9 @@ SRCS :=
 
 include cfg.mk
 
-all: $(ALL_LIBS)
+all:
+	@echo "Making examples in ./examples"
+	$(Q)$(MAKE) -C examples
 
 scratch: $(OBJ_SUBDIRS) $(OBJ_DIR)/scratch.o $(OBJS)
 	@$(quiet_CC)
