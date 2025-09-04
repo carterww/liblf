@@ -19,7 +19,7 @@ static void thread_consumer(void)
 		 */
 		h = lf_op_load_uint(&head);
 		t = lf_op_load_uint(&tail);
-		if (t <= h) {
+		if (t == h) {
 			break;
 		}
 		idx = h & (RING_LEN - 1);
@@ -51,7 +51,7 @@ static void thread_producer(void)
 		 */
 		t = lf_op_load_uint(&tail);
 		h = lf_op_load_uint(&head);
-		if (t - h >= RING_LEN) {
+		if (t - h == RING_LEN) {
 			break;
 		}
 		item = (void *)(size_t)(t - h + 1);
@@ -72,7 +72,7 @@ static void thread_producer(void)
 int main(void)
 {
 	/* Imagine these are running concurrently for the purposes of the
-	 * example. In this case there are no issues becuase they are run
+	 * example. In this case there are no issues because they are run
 	 * one after the other.
 	 *
 	 * This is also a single producer single consumer ring buffer. That
