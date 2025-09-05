@@ -2,6 +2,13 @@
  * Copyright (c) 2025 Carter Williams
  */
 
+/* This file implements a lock-free bitstring.
+ *
+ * It is important to note that the caller is responsible for passing
+ * valid arguments to the functions; lf_bitstring DOES NOT do any
+ * NULL or bounds checking if asserts are not compiled.
+ */
+
 #ifndef LF_BITSTRING_H
 #define LF_BITSTRING_H
 
@@ -50,6 +57,8 @@ struct lf_bitstring {
 /* Initializes bitstring from a buffer bits of size (bytes) bits_size. It also
  * sets all the bits to bits_val.
  *
+ * Returns the number of bits the bitstring can store.
+ *
  * This operation is not thread-safe.
  */
 LF_ATTR_ALWAYS_INLINE
@@ -78,6 +87,10 @@ static void lf_bitstring_reset(lf_bitstring *bitstring, bool bits_val)
 	       bitstring->nwords * LF_BITSTRING_WORD_SIZE);
 }
 
+/* Tests bit at LF_BITSTRING_WORD_BITS * word_index + bit_index in the bitstring.
+ *
+ * Returns true if the bit was set, false if the bit was zero.
+ */
 LF_ATTR_ALWAYS_INLINE
 static bool lf_bitstring_test_word(lf_bitstring *bitstring,
 				   unsigned int word_index,
@@ -87,6 +100,11 @@ static bool lf_bitstring_test_word(lf_bitstring *bitstring,
 	return (word & ((lf_native_word)1 << bit_index)) != 0;
 }
 
+/* Sets bit at LF_BITSTRING_WORD_BITS * word_index + bit_index in the bitstring.
+ *
+ * Returns true if the bit was set prior to the operation, false if the
+ * bit was zero prior to the operation.
+ */
 LF_ATTR_ALWAYS_INLINE
 static bool lf_bitstring_test_and_set_word(lf_bitstring *bitstring,
 					   unsigned int word_index,
@@ -95,6 +113,12 @@ static bool lf_bitstring_test_and_set_word(lf_bitstring *bitstring,
 	return lf_op_bts_native(&bitstring->bits[word_index], bit_index);
 }
 
+/* Complements bit at LF_BITSTRING_WORD_BITS * word_index + bit_index in the
+ * bitstring.
+ *
+ * Returns true if the bit was set prior to the operation, false if the
+ * bit was zero prior to the operation.
+ */
 LF_ATTR_ALWAYS_INLINE
 static bool lf_bitstring_test_and_complement_word(lf_bitstring *bitstring,
 						  unsigned int word_index,
@@ -103,6 +127,12 @@ static bool lf_bitstring_test_and_complement_word(lf_bitstring *bitstring,
 	return lf_op_btc_native(&bitstring->bits[word_index], bit_index);
 }
 
+/* Zeros bit at LF_BITSTRING_WORD_BITS * word_index + bit_index in the
+ * bitstring.
+ *
+ * Returns true if the bit was set prior to the operation, false if the
+ * bit was zero prior to the operation.
+ */
 LF_ATTR_ALWAYS_INLINE
 static bool lf_bitstring_test_and_zero_word(lf_bitstring *bitstring,
 					    unsigned int word_index,
@@ -111,9 +141,18 @@ static bool lf_bitstring_test_and_zero_word(lf_bitstring *bitstring,
 	return lf_op_btr_native(&bitstring->bits[word_index], bit_index);
 }
 
+/* Helper macros to convert an absolute bit index to an offset into the
+ * array and an offset into the word.
+ */
 #define LF_BS_OFF(index) ((index) / LF_BITSTRING_WORD_BITS)
 #define LF_BS_OFF_INTO(index) ((index) & (LF_BITSTRING_WORD_BITS - 1))
 
+/* Tests bit at index in the bitstring. This function differs from
+ * lf_bitstring_test_word() because it takes the bit's absolute index
+ * into the bitstring.
+ *
+ * Returns true if the bit was set, false if the bit was zero.
+ */
 LF_ATTR_ALWAYS_INLINE
 static bool lf_bitstring_test(lf_bitstring *bitstring, unsigned int index)
 {
@@ -122,6 +161,13 @@ static bool lf_bitstring_test(lf_bitstring *bitstring, unsigned int index)
 	return lf_bitstring_test_word(bitstring, word_index, bit_index);
 }
 
+/* Sets bit at index in the bitstring. This function differs from
+ * lf_bitstring_test_and_set_word() because it takes the bit's absolute index
+ * into the bitstring.
+ *
+ * Returns true if the bit was set prior to the operation, false if the
+ * bit was zero prior to the operation.
+ */
 LF_ATTR_ALWAYS_INLINE
 static bool lf_bitstring_test_and_set(lf_bitstring *bitstring,
 				      unsigned int index)
@@ -131,6 +177,13 @@ static bool lf_bitstring_test_and_set(lf_bitstring *bitstring,
 	return lf_bitstring_test_and_set_word(bitstring, word_index, bit_index);
 }
 
+/* Complements bit at index in the bitstring. This function differs from
+ * lf_bitstring_test_and_complement_word() because it takes the bit's
+ * absolute index into the bitstring.
+ *
+ * Returns true if the bit was set prior to the operation, false if the
+ * bit was zero prior to the operation.
+ */
 LF_ATTR_ALWAYS_INLINE
 static bool lf_bitstring_test_and_complement(lf_bitstring *bitstring,
 					     unsigned int index)
@@ -141,6 +194,13 @@ static bool lf_bitstring_test_and_complement(lf_bitstring *bitstring,
 						     bit_index);
 }
 
+/* Zeros bit at index in the bitstring. This function differs from
+ * lf_bitstring_test_and_zero_word() because it takes the bit's
+ * absolute index into the bitstring.
+ *
+ * Returns true if the bit was set prior to the operation, false if the
+ * bit was zero prior to the operation.
+ */
 LF_ATTR_ALWAYS_INLINE
 static bool lf_bitstring_test_and_zero(lf_bitstring *bitstring,
 				       unsigned int index)
@@ -154,6 +214,13 @@ static bool lf_bitstring_test_and_zero(lf_bitstring *bitstring,
 #undef LF_BS_OFF
 #undef LF_BS_OFF_INTO
 
+/* Internal function used to find the index of the next set bit in
+ * the bitstring. It is not defined if the search starts from the
+ * end or start of the word. Some architectures don't implement
+ * trailing zero count.
+ *
+ * word CANNOT be zero.
+ */
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_bitstring_find_set_word(lf_native_word word)
 {
@@ -173,14 +240,30 @@ static unsigned int lf_bitstring_find_set_word(lf_native_word word)
 	return (unsigned int)idx;
 }
 
+/* IMPORTANT NOTE:
+ *
+ * The next set of functions search through the bitstring from lower memory
+ * words to higher memory words. Since this is a lock-free bitstring, it
+ * is possible that another thread sets a bit in a word that was already
+ * checked. This could lead to a function returning UINT_MAX to indicate
+ * no set or zero bit was found even though there truly is.
+ *
+ * You may want to do more than one pass over the bitstring if the bitstring
+ * is changing frequently.
+ */
+
+/* Looks for a set bit in the bitstring starting at word word_index_start.
+ *
+ * Return the index of a set bit, UINT_MAX otherwise.
+ */
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_bitstring_next_set(lf_bitstring *bitstring,
-					  unsigned int index_start)
+					  unsigned int word_index_start)
 {
 	lf_native_word word;
 	unsigned int bit_index;
 
-	for (unsigned int i = index_start; i < bitstring->nwords; ++i) {
+	for (unsigned int i = word_index_start; i < bitstring->nwords; ++i) {
 		word = lf_op_load_native(&bitstring->bits[i]);
 		if (word == 0) {
 			continue;
@@ -191,14 +274,18 @@ static unsigned int lf_bitstring_next_set(lf_bitstring *bitstring,
 	return UINT_MAX;
 }
 
+/* Looks for a zero bit in the bitstring starting at word word_index_start.
+ *
+ * Return the index of a set bit, UINT_MAX otherwise.
+ */
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_bitstring_next_zero(lf_bitstring *bitstring,
-					   unsigned int index_start)
+					   unsigned int word_index_start)
 {
 	lf_native_word word;
 	unsigned int bit_index;
 
-	for (unsigned int i = index_start; i < bitstring->nwords; ++i) {
+	for (unsigned int i = word_index_start; i < bitstring->nwords; ++i) {
 		word = ~lf_op_load_native(&bitstring->bits[i]);
 		if (word == 0) {
 			continue;
@@ -209,18 +296,31 @@ static unsigned int lf_bitstring_next_zero(lf_bitstring *bitstring,
 	return UINT_MAX;
 }
 
+/* Looks for a set bit in the bitstring starting the first word.
+ *
+ * Return the index of a set bit, UINT_MAX otherwise.
+ */
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_bitstring_find_set(lf_bitstring *bitstring)
 {
 	return lf_bitstring_next_set(bitstring, 0);
 }
 
+/* Looks for a zero bit in the bitstring starting the first word.
+ *
+ * Return the index of a set bit, UINT_MAX otherwise.
+ */
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_bitstring_find_zero(lf_bitstring *bitstring)
 {
 	return lf_bitstring_next_zero(bitstring, 0);
 }
 
+/* Attemps to find a set bit and atomically set it to zero.
+ *
+ * Returns the index of the zeroed bit if successful, UINT_MAX if no bit
+ * could be zeroed.
+ */
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_bitstring_find_set_and_zero(lf_bitstring *bitstring)
 {
@@ -252,6 +352,11 @@ static unsigned int lf_bitstring_find_set_and_zero(lf_bitstring *bitstring)
 	return UINT_MAX;
 }
 
+/* Attemps to find a zero bit and atomically set it.
+ *
+ * Returns the index of the set bit if successful, UINT_MAX if no bit
+ * could be set.
+ */
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_bitstring_find_zero_and_set(lf_bitstring *bitstring)
 {
