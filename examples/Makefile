@@ -1,7 +1,7 @@
 LIBLF_BUILD_TYPE := debug
 SRCS :=
 
-include ../cfg.mk
+include ../settings.mk
 
 HDEPS := lf_cc.h lf_op.h lf_op_sup.h lf_platform.h \
 	lf/gcc/lf_op_gcc.h lf/gcc/lf_op_x64.h \

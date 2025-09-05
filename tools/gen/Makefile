@@ -1,7 +1,7 @@
 LIBLF_BUILD_TYPE := reldebug
 LIBLF_COMPILE_ASSERTS := 1
 
-include ../../cfg.mk
+include ../../settings.mk
 
 COMMON_DEPS := lf_gen_common.h lf_gen_functions.h lf_gen_string.h lf_gen_types.h
 
@@ -18,5 +18,6 @@ clean:
 	$(Q)rm lf_gen_x64 lf_gen_x64.d
 
 -include lf_gen_gcc.d
+-include lf_gen_x64.d
 
 .PHONY: all clean

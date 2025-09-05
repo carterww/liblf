@@ -1,6 +1,6 @@
 SRCS :=
 
-include cfg.mk
+include settings.mk
 
 all:
 	@echo "Making examples in ./examples"
