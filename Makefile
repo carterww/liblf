@@ -1,6 +1,9 @@
 SRCS :=
 
+include config.mk
 include settings.mk
+
+CFLAGS += -DLIBLF_CONFIG_CACHELINE=$(LIBLF_CONFIG_CACHELINE)
 
 all:
 	@echo "Making examples in ./examples"

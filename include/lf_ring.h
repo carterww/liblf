@@ -13,9 +13,6 @@
 #include <lf_op.h>
 #include <lf_platform.h>
 
-/* TODO: Make this a build time config param */
-#define LF_RING_CACHELINE_PAD (64)
-
 /* lf_ring allows you to use a custom data type that is contained in each
  * slot. If none is provided, a union of generic pointers is stored in
  * the buffer.
@@ -109,7 +106,7 @@ struct lf_ring_mp_slot {
 
 struct lf_ring_sp {
 	size_t head;
-	char _pad[LF_RING_CACHELINE_PAD - sizeof(size_t)];
+	char _pad[LIBLF_CONFIG_CACHELINE - sizeof(size_t)];
 	size_t tail;
 	size_t mask;
 	struct lf_ring_sp_slot *buf;
@@ -117,7 +114,7 @@ struct lf_ring_sp {
 
 struct lf_ring_mp {
 	size_t head;
-	char _pad[LF_RING_CACHELINE_PAD - sizeof(size_t)];
+	char _pad[LIBLF_CONFIG_CACHELINE - sizeof(size_t)];
 	size_t tail;
 	size_t mask;
 	struct lf_ring_mp_slot *buf;
