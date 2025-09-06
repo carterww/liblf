@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include <lf_cc.h>
+#include <lf_debug.h>
 #include <lf_op.h>
 #include <lf_platform.h>
 
@@ -96,6 +97,8 @@ static bool lf_bitstring_test_word(lf_bitstring *bitstring,
 				   unsigned int word_index,
 				   unsigned int bit_index)
 {
+	lf_assert(word_index < bitstring->nwords);
+	lf_assert(bit_index < LF_BITSTRING_WORD_BITS);
 	lf_native_word word = lf_op_load_native(&bitstring->bits[word_index]);
 	return (word & ((lf_native_word)1 << bit_index)) != 0;
 }
@@ -110,6 +113,8 @@ static bool lf_bitstring_test_and_set_word(lf_bitstring *bitstring,
 					   unsigned int word_index,
 					   unsigned int bit_index)
 {
+	lf_assert(word_index < bitstring->nwords);
+	lf_assert(bit_index < LF_BITSTRING_WORD_BITS);
 	return lf_op_bts_native(&bitstring->bits[word_index], bit_index);
 }
 
@@ -124,6 +129,8 @@ static bool lf_bitstring_test_and_complement_word(lf_bitstring *bitstring,
 						  unsigned int word_index,
 						  unsigned int bit_index)
 {
+	lf_assert(word_index < bitstring->nwords);
+	lf_assert(bit_index < LF_BITSTRING_WORD_BITS);
 	return lf_op_btc_native(&bitstring->bits[word_index], bit_index);
 }
 
@@ -138,6 +145,8 @@ static bool lf_bitstring_test_and_zero_word(lf_bitstring *bitstring,
 					    unsigned int word_index,
 					    unsigned int bit_index)
 {
+	lf_assert(word_index < bitstring->nwords);
+	lf_assert(bit_index < LF_BITSTRING_WORD_BITS);
 	return lf_op_btr_native(&bitstring->bits[word_index], bit_index);
 }
 
@@ -225,6 +234,8 @@ LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_bitstring_find_set_word(lf_native_word word)
 {
 	lf_native_word idx;
+
+	lf_assert(word != 0);
 #if defined(LF_ARCH_X86_64)
 	__asm__ __volatile__("tzcnt %1, %0" : "=r"(idx) : "rm"(word) : "cc");
 #elif defined(LF_ARCH_ARM64) || defined(LF_ARCH_ARM)
@@ -263,6 +274,7 @@ static unsigned int lf_bitstring_next_set(lf_bitstring *bitstring,
 	lf_native_word word;
 	unsigned int bit_index;
 
+	lf_assert(word_index_start < bitstring->nwords);
 	for (unsigned int i = word_index_start; i < bitstring->nwords; ++i) {
 		word = lf_op_load_native(&bitstring->bits[i]);
 		if (word == 0) {
@@ -285,6 +297,7 @@ static unsigned int lf_bitstring_next_zero(lf_bitstring *bitstring,
 	lf_native_word word;
 	unsigned int bit_index;
 
+	lf_assert(word_index_start < bitstring->nwords);
 	for (unsigned int i = word_index_start; i < bitstring->nwords; ++i) {
 		word = ~lf_op_load_native(&bitstring->bits[i]);
 		if (word == 0) {

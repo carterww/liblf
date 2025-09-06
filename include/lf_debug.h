@@ -2,15 +2,15 @@
  * Copyright (c) 2025 Carter Williams
  */
 
-#ifndef LXEV_DEBUG_H
-#define LXEV_DEBUG_H
+#ifndef LF_DEBUG_H
+#define LF_DEBUG_H
 
 #include <lf_cc.h>
 
 #define lf_static_assert(expr, message) \
 	typedef char lf_static_assert_##message[(expr) ? 1 : -1]
 
-#if defined(LF_COMPILE_ASSERTS) && LF_COMPILE_ASSERTS != 0
+#if defined(LIBLF_COMPILE_ASSERTS) && LIBLF_COMPILE_ASSERTS != 0
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@
 static const char *assert_failed_context = "liblf Assertion failed";
 static const char *panic_context = "liblf Panic!";
 
-LXEV_ATTR_NORETURN
+LF_ATTR_NORETURN
 static void print_and_fail(const char *context, const char *file_name,
 			   int line_number)
 {
@@ -47,6 +47,6 @@ static void print_and_fail(const char *context, const char *file_name,
 
 #define lf_panic() lf_unreachable()
 
-#endif /* LXEV_BUILD_OPT_COMPILE_ASSERTS != 0 */
+#endif /* LIBLF_COMPILE_ASSERTS != 0 */
 
-#endif /* LXEV_DEBUG_H */
+#endif /* LF_DEBUG_H */
