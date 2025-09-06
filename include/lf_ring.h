@@ -393,9 +393,7 @@ static bool lf_ring_mpsc_enqueue(lf_ring_mpmc *ring,
 			if (lf_op_cas_size(&ring->tail, t, t + 1)) {
 				break;
 			}
-		} else if (diff_signed > 0) {
-			continue;
-		} else {
+		} else if (diff_signed < 0) {
 			return false;
 		}
 	}
@@ -437,9 +435,8 @@ static bool lf_ring_mpsc_dequeue(lf_ring_mpmc *ring, lf_ring_slot_data *item)
 			 * other consumers can write to it.
 			 */
 			lf_op_store_size(&ring->head, h_next);
-		} else if (diff_signed > 0) {
-			continue;
-		} else {
+			break;
+		} else if (diff_signed < 0) {
 			return false;
 		}
 	}
@@ -482,9 +479,7 @@ static bool lf_ring_mpmc_dequeue(lf_ring_mpmc *ring, lf_ring_slot_data *item)
 			if (lf_op_cas_size(&ring->head, h, h_next)) {
 				break;
 			}
-		} else if (diff_signed > 0) {
-			continue;
-		} else {
+		} else if (diff_signed < 0) {
 			return false;
 		}
 	}
