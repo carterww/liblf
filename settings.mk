@@ -85,3 +85,6 @@ endif
 OBJS := $(patsubst %.c,%.o,$(SRCS))
 SRCS := $(patsubst %,$(SRC_DIR)/%,$(SRCS))
 OBJS := $(patsubst %,$(OBJ_DIR)/%,$(OBJS))
+
+# Add config flags
+CFLAGS += -DLIBLF_CONFIG_CACHELINE=$(LIBLF_CONFIG_CACHELINE)
