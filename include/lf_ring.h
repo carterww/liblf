@@ -104,18 +104,24 @@ struct lf_ring_mp_slot {
 	lf_ring_slot_data data;
 };
 
+/* Pad head and tail so each can be on their own cacheline. This
+ * prevents false sharing between head, tail, mask, and buf.
+ */
+
 struct lf_ring_sp {
 	size_t head;
-	char _pad[LIBLF_CONFIG_CACHELINE - sizeof(size_t)];
+	char _pad1[LIBLF_CONFIG_CACHELINE - sizeof(size_t)];
 	size_t tail;
+	char _pad2[LIBLF_CONFIG_CACHELINE - sizeof(size_t)];
 	size_t mask;
 	struct lf_ring_sp_slot *buf;
 };
 
 struct lf_ring_mp {
 	size_t head;
-	char _pad[LIBLF_CONFIG_CACHELINE - sizeof(size_t)];
+	char _pad1[LIBLF_CONFIG_CACHELINE - sizeof(size_t)];
 	size_t tail;
+	char _pad2[LIBLF_CONFIG_CACHELINE - sizeof(size_t)];
 	size_t mask;
 	struct lf_ring_mp_slot *buf;
 };
