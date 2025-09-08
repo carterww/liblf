@@ -4,7 +4,7 @@
 
 /* This file was automatically generated. DO NOT MODIFY IT DIRECTLY.
  *
- * Date:      2025-09-02 23:01:44
+ * Date:      2025-09-08 10:23:09
  * Generator: liblf/tools/gen/lf_gen_x64.c
  * Version:   v0.1.0
  *
@@ -640,8 +640,9 @@ static lf_native_word lf_op_swap_native(lf_native_word *p, lf_native_word val)
 }
 
 /* lf_op_cas and lf_op_cax use the cmpxchg instruction to perform an atomic CAS.
- * lf_op_cas returns a boolean that indicates if the CAS was successful, and lf_op_casx
- * returns the original value in p (val_old if successful).
+ * Both functions return a boolean that indicate if the CAS was successful. The only
+ * difference is lf_op_casx takes a pointer to val_old and loads p's actual value
+ * into val_old on failure.
  * 
  * I just want to make a note of how this works so I don't forget in the future.
  * cmpxchg uses the a register (rax) as val_old and places p's orignal value in the
@@ -887,222 +888,241 @@ static bool lf_op_cas_native(lf_native_word *p, lf_native_word val_old,
 }
 
 LF_ATTR_ALWAYS_INLINE
-static void *lf_op_casx_ptr(void *p, void *val_old, void *val_new)
+static bool lf_op_casx_ptr(void *p, void *val_old, void *val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*(void **)p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*(void **)p), "=@ccz"(zf),
+			       "+a"(*(void **)val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static intptr_t lf_op_casx_iptr(intptr_t *p, intptr_t val_old, intptr_t val_new)
+static bool lf_op_casx_iptr(intptr_t *p, intptr_t *val_old, intptr_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static uintptr_t lf_op_casx_uptr(uintptr_t *p, uintptr_t val_old,
-				 uintptr_t val_new)
+static bool lf_op_casx_uptr(uintptr_t *p, uintptr_t *val_old, uintptr_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static signed char lf_op_casx_char(signed char *p, signed char val_old,
-				   signed char val_new)
+static bool lf_op_casx_char(signed char *p, signed char *val_old,
+			    signed char val_new)
 {
-	__asm__ __volatile__("lock cmpxchgb %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgb %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static unsigned char lf_op_casx_uchar(unsigned char *p, unsigned char val_old,
-				      unsigned char val_new)
+static bool lf_op_casx_uchar(unsigned char *p, unsigned char *val_old,
+			     unsigned char val_new)
 {
-	__asm__ __volatile__("lock cmpxchgb %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgb %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static short lf_op_casx_short(short *p, short val_old, short val_new)
+static bool lf_op_casx_short(short *p, short *val_old, short val_new)
 {
-	__asm__ __volatile__("lock cmpxchgw %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgw %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static unsigned short lf_op_casx_ushort(unsigned short *p,
-					unsigned short val_old,
-					unsigned short val_new)
+static bool lf_op_casx_ushort(unsigned short *p, unsigned short *val_old,
+			      unsigned short val_new)
 {
-	__asm__ __volatile__("lock cmpxchgw %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgw %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static int lf_op_casx_int(int *p, int val_old, int val_new)
+static bool lf_op_casx_int(int *p, int *val_old, int val_new)
 {
-	__asm__ __volatile__("lock cmpxchgl %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgl %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static unsigned int lf_op_casx_uint(unsigned int *p, unsigned int val_old,
-				    unsigned int val_new)
+static bool lf_op_casx_uint(unsigned int *p, unsigned int *val_old,
+			    unsigned int val_new)
 {
-	__asm__ __volatile__("lock cmpxchgl %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgl %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static long lf_op_casx_long(long *p, long val_old, long val_new)
+static bool lf_op_casx_long(long *p, long *val_old, long val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static unsigned long lf_op_casx_ulong(unsigned long *p, unsigned long val_old,
-				      unsigned long val_new)
+static bool lf_op_casx_ulong(unsigned long *p, unsigned long *val_old,
+			     unsigned long val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static int8_t lf_op_casx_i8(int8_t *p, int8_t val_old, int8_t val_new)
+static bool lf_op_casx_i8(int8_t *p, int8_t *val_old, int8_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgb %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgb %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static uint8_t lf_op_casx_u8(uint8_t *p, uint8_t val_old, uint8_t val_new)
+static bool lf_op_casx_u8(uint8_t *p, uint8_t *val_old, uint8_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgb %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgb %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static int16_t lf_op_casx_i16(int16_t *p, int16_t val_old, int16_t val_new)
+static bool lf_op_casx_i16(int16_t *p, int16_t *val_old, int16_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgw %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgw %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static uint16_t lf_op_casx_u16(uint16_t *p, uint16_t val_old, uint16_t val_new)
+static bool lf_op_casx_u16(uint16_t *p, uint16_t *val_old, uint16_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgw %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgw %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static int32_t lf_op_casx_i32(int32_t *p, int32_t val_old, int32_t val_new)
+static bool lf_op_casx_i32(int32_t *p, int32_t *val_old, int32_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgl %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgl %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static uint32_t lf_op_casx_u32(uint32_t *p, uint32_t val_old, uint32_t val_new)
+static bool lf_op_casx_u32(uint32_t *p, uint32_t *val_old, uint32_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgl %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgl %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static int64_t lf_op_casx_i64(int64_t *p, int64_t val_old, int64_t val_new)
+static bool lf_op_casx_i64(int64_t *p, int64_t *val_old, int64_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static uint64_t lf_op_casx_u64(uint64_t *p, uint64_t val_old, uint64_t val_new)
+static bool lf_op_casx_u64(uint64_t *p, uint64_t *val_old, uint64_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static size_t lf_op_casx_size(size_t *p, size_t val_old, size_t val_new)
+static bool lf_op_casx_size(size_t *p, size_t *val_old, size_t val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_native_word lf_op_casx_native(lf_native_word *p,
-					lf_native_word val_old,
-					lf_native_word val_new)
+static bool lf_op_casx_native(lf_native_word *p, lf_native_word *val_old,
+			      lf_native_word val_new)
 {
-	__asm__ __volatile__("lock cmpxchgq %2, %0"
-			     : "+m"(*p), "+a"(val_old)
+	bool zf;
+	__asm__ __volatile__("lock cmpxchgq %3, %0"
+			     : "+m"(*p), "=@ccz"(zf), "+a"(*val_old)
 			     : "r"(val_new)
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
@@ -4606,285 +4626,215 @@ static bool lf_op_dcas_native(lf_dcas_packed_native *p,
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_ptr lf_op_dcasx_ptr(lf_dcas_packed_ptr *p,
-					  lf_dcas_packed_ptr val_old,
-					  lf_dcas_packed_ptr val_new,
-					  bool *success)
+static bool lf_op_dcasx_ptr(lf_dcas_packed_ptr *p, lf_dcas_packed_ptr *val_old,
+			    lf_dcas_packed_ptr val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_iptr lf_op_dcasx_iptr(lf_dcas_packed_iptr *p,
-					    lf_dcas_packed_iptr val_old,
-					    lf_dcas_packed_iptr val_new,
-					    bool *success)
+static bool lf_op_dcasx_iptr(lf_dcas_packed_iptr *p,
+			     lf_dcas_packed_iptr *val_old,
+			     lf_dcas_packed_iptr val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_uptr lf_op_dcasx_uptr(lf_dcas_packed_uptr *p,
-					    lf_dcas_packed_uptr val_old,
-					    lf_dcas_packed_uptr val_new,
-					    bool *success)
+static bool lf_op_dcasx_uptr(lf_dcas_packed_uptr *p,
+			     lf_dcas_packed_uptr *val_old,
+			     lf_dcas_packed_uptr val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_char lf_op_dcasx_char(lf_dcas_packed_char *p,
-					    lf_dcas_packed_char val_old,
-					    lf_dcas_packed_char val_new,
-					    bool *success)
+static bool lf_op_dcasx_char(lf_dcas_packed_char *p,
+			     lf_dcas_packed_char *val_old,
+			     lf_dcas_packed_char val_new)
 {
-	lf_dcas_packed_char val_orig;
-	val_orig.scalar =
-		lf_op_casx_u16(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u16(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_uchar lf_op_dcasx_uchar(lf_dcas_packed_uchar *p,
-					      lf_dcas_packed_uchar val_old,
-					      lf_dcas_packed_uchar val_new,
-					      bool *success)
+static bool lf_op_dcasx_uchar(lf_dcas_packed_uchar *p,
+			      lf_dcas_packed_uchar *val_old,
+			      lf_dcas_packed_uchar val_new)
 {
-	lf_dcas_packed_uchar val_orig;
-	val_orig.scalar =
-		lf_op_casx_u16(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u16(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_short lf_op_dcasx_short(lf_dcas_packed_short *p,
-					      lf_dcas_packed_short val_old,
-					      lf_dcas_packed_short val_new,
-					      bool *success)
+static bool lf_op_dcasx_short(lf_dcas_packed_short *p,
+			      lf_dcas_packed_short *val_old,
+			      lf_dcas_packed_short val_new)
 {
-	lf_dcas_packed_short val_orig;
-	val_orig.scalar =
-		lf_op_casx_u32(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u32(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_ushort lf_op_dcasx_ushort(lf_dcas_packed_ushort *p,
-						lf_dcas_packed_ushort val_old,
-						lf_dcas_packed_ushort val_new,
-						bool *success)
+static bool lf_op_dcasx_ushort(lf_dcas_packed_ushort *p,
+			       lf_dcas_packed_ushort *val_old,
+			       lf_dcas_packed_ushort val_new)
 {
-	lf_dcas_packed_ushort val_orig;
-	val_orig.scalar =
-		lf_op_casx_u32(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u32(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_int lf_op_dcasx_int(lf_dcas_packed_int *p,
-					  lf_dcas_packed_int val_old,
-					  lf_dcas_packed_int val_new,
-					  bool *success)
+static bool lf_op_dcasx_int(lf_dcas_packed_int *p, lf_dcas_packed_int *val_old,
+			    lf_dcas_packed_int val_new)
 {
-	lf_dcas_packed_int val_orig;
-	val_orig.scalar =
-		lf_op_casx_u64(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u64(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_uint lf_op_dcasx_uint(lf_dcas_packed_uint *p,
-					    lf_dcas_packed_uint val_old,
-					    lf_dcas_packed_uint val_new,
-					    bool *success)
+static bool lf_op_dcasx_uint(lf_dcas_packed_uint *p,
+			     lf_dcas_packed_uint *val_old,
+			     lf_dcas_packed_uint val_new)
 {
-	lf_dcas_packed_uint val_orig;
-	val_orig.scalar =
-		lf_op_casx_u64(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u64(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_long lf_op_dcasx_long(lf_dcas_packed_long *p,
-					    lf_dcas_packed_long val_old,
-					    lf_dcas_packed_long val_new,
-					    bool *success)
+static bool lf_op_dcasx_long(lf_dcas_packed_long *p,
+			     lf_dcas_packed_long *val_old,
+			     lf_dcas_packed_long val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_ulong lf_op_dcasx_ulong(lf_dcas_packed_ulong *p,
-					      lf_dcas_packed_ulong val_old,
-					      lf_dcas_packed_ulong val_new,
-					      bool *success)
+static bool lf_op_dcasx_ulong(lf_dcas_packed_ulong *p,
+			      lf_dcas_packed_ulong *val_old,
+			      lf_dcas_packed_ulong val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_i8 lf_op_dcasx_i8(lf_dcas_packed_i8 *p,
-					lf_dcas_packed_i8 val_old,
-					lf_dcas_packed_i8 val_new,
-					bool *success)
+static bool lf_op_dcasx_i8(lf_dcas_packed_i8 *p, lf_dcas_packed_i8 *val_old,
+			   lf_dcas_packed_i8 val_new)
 {
-	lf_dcas_packed_i8 val_orig;
-	val_orig.scalar =
-		lf_op_casx_i16(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_i16(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_u8 lf_op_dcasx_u8(lf_dcas_packed_u8 *p,
-					lf_dcas_packed_u8 val_old,
-					lf_dcas_packed_u8 val_new,
-					bool *success)
+static bool lf_op_dcasx_u8(lf_dcas_packed_u8 *p, lf_dcas_packed_u8 *val_old,
+			   lf_dcas_packed_u8 val_new)
 {
-	lf_dcas_packed_u8 val_orig;
-	val_orig.scalar =
-		lf_op_casx_u16(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u16(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_i16 lf_op_dcasx_i16(lf_dcas_packed_i16 *p,
-					  lf_dcas_packed_i16 val_old,
-					  lf_dcas_packed_i16 val_new,
-					  bool *success)
+static bool lf_op_dcasx_i16(lf_dcas_packed_i16 *p, lf_dcas_packed_i16 *val_old,
+			    lf_dcas_packed_i16 val_new)
 {
-	lf_dcas_packed_i16 val_orig;
-	val_orig.scalar =
-		lf_op_casx_i32(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_i32(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_u16 lf_op_dcasx_u16(lf_dcas_packed_u16 *p,
-					  lf_dcas_packed_u16 val_old,
-					  lf_dcas_packed_u16 val_new,
-					  bool *success)
+static bool lf_op_dcasx_u16(lf_dcas_packed_u16 *p, lf_dcas_packed_u16 *val_old,
+			    lf_dcas_packed_u16 val_new)
 {
-	lf_dcas_packed_u16 val_orig;
-	val_orig.scalar =
-		lf_op_casx_u32(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u32(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_i32 lf_op_dcasx_i32(lf_dcas_packed_i32 *p,
-					  lf_dcas_packed_i32 val_old,
-					  lf_dcas_packed_i32 val_new,
-					  bool *success)
+static bool lf_op_dcasx_i32(lf_dcas_packed_i32 *p, lf_dcas_packed_i32 *val_old,
+			    lf_dcas_packed_i32 val_new)
 {
-	lf_dcas_packed_i32 val_orig;
-	val_orig.scalar =
-		lf_op_casx_i64(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_i64(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_u32 lf_op_dcasx_u32(lf_dcas_packed_u32 *p,
-					  lf_dcas_packed_u32 val_old,
-					  lf_dcas_packed_u32 val_new,
-					  bool *success)
+static bool lf_op_dcasx_u32(lf_dcas_packed_u32 *p, lf_dcas_packed_u32 *val_old,
+			    lf_dcas_packed_u32 val_new)
 {
-	lf_dcas_packed_u32 val_orig;
-	val_orig.scalar =
-		lf_op_casx_u64(&p->scalar, val_old.scalar, val_new.scalar);
-	*success = val_orig.scalar == val_old.scalar;
-	return val_orig;
+	return lf_op_casx_u64(&p->scalar, &val_old->scalar, val_new.scalar);
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_i64 lf_op_dcasx_i64(lf_dcas_packed_i64 *p,
-					  lf_dcas_packed_i64 val_old,
-					  lf_dcas_packed_i64 val_new,
-					  bool *success)
+static bool lf_op_dcasx_i64(lf_dcas_packed_i64 *p, lf_dcas_packed_i64 *val_old,
+			    lf_dcas_packed_i64 val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_u64 lf_op_dcasx_u64(lf_dcas_packed_u64 *p,
-					  lf_dcas_packed_u64 val_old,
-					  lf_dcas_packed_u64 val_new,
-					  bool *success)
+static bool lf_op_dcasx_u64(lf_dcas_packed_u64 *p, lf_dcas_packed_u64 *val_old,
+			    lf_dcas_packed_u64 val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_size lf_op_dcasx_size(lf_dcas_packed_size *p,
-					    lf_dcas_packed_size val_old,
-					    lf_dcas_packed_size val_new,
-					    bool *success)
+static bool lf_op_dcasx_size(lf_dcas_packed_size *p,
+			     lf_dcas_packed_size *val_old,
+			     lf_dcas_packed_size val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 LF_ATTR_ALWAYS_INLINE
-static lf_dcas_packed_native lf_op_dcasx_native(lf_dcas_packed_native *p,
-						lf_dcas_packed_native val_old,
-						lf_dcas_packed_native val_new,
-						bool *success)
+static bool lf_op_dcasx_native(lf_dcas_packed_native *p,
+			       lf_dcas_packed_native *val_old,
+			       lf_dcas_packed_native val_new)
 {
+	bool zf;
 	__asm__ __volatile__("lock cmpxchg16b %0"
-			     : "+m"(*p->tuple), "=@ccz"(*success),
-			       "+a"(val_old.tuple[0]), "+d"(val_old.tuple[1])
+			     : "+m"(*p->tuple), "=@ccz"(zf),
+			       "+a"(val_old->tuple[0]), "+d"(val_old->tuple[1])
 			     : "b"(val_new.tuple[0]), "c"(val_new.tuple[1])
 			     : "memory", "cc");
-	return val_old;
+	return zf;
 }
 
 #endif /* LF_OP_X64_H */

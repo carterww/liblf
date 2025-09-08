@@ -246,17 +246,21 @@ static void append_inline_asm_fix_ptr_deref(string *s, enum lf_gen_type type,
 					    const char *body, bool new_line)
 {
 	if (type == LF_GEN_TYPE_PTR) {
+		size_t len = strlen(body);
 		string ptr_impl;
 		string_init(&ptr_impl, 128);
 		/* This is so lazy of me */
-		for (size_t i = 0; i < strlen(body) - 1; ++i) {
+		for (size_t i = 0; i < len - 1; ++i) {
 			if (body[i] == '*' && body[i + 1] == 'p') {
 				string_append_raw(&ptr_impl, "*(void **)", 10);
-				string_append_raw(&ptr_impl, &body[i + 1], 0);
-				break;
+				continue;
+			} else if (body[i] == '*' && body[i + 1] == 'v') {
+				string_append_raw(&ptr_impl, "*(void **)", 10);
+				continue;
 			}
 			string_append_char(&ptr_impl, body[i]);
 		}
+		string_append_char(&ptr_impl, body[len - 1]);
 		append_inline_asm(s, type, ptr_impl.buffer, new_line);
 		string_destroy(&ptr_impl);
 		return;
@@ -336,14 +340,16 @@ static string generate_casx_impl(enum lf_gen_type type)
 	string s;
 	string_init(&s, 128);
 
-	static const char *asm_casx_x64 = "'lock cmpxchg %2, %0'\n"
-					  ": '+m'(*p), '+a'(val_old)\n"
-					  ": 'r'(val_new)\n"
-					  ": 'memory', 'cc'";
+	static const char *asm_casx_x64 =
+		"'lock cmpxchg %3, %0'\n"
+		": '+m'(*p), '=@ccz'(zf), '+a'(*val_old)\n"
+		": 'r'(val_new)\n"
+		": 'memory', 'cc'";
 
+	lf_gen_declare_var_str_type(&s, "bool", "zf", 1);
 	append_inline_asm_fix_ptr_deref(&s, type, asm_casx_x64, true);
 	/* Return the original value of p */
-	lf_gen_return(&s, "val_old", 1);
+	lf_gen_return(&s, "zf", 1);
 
 	return s;
 }
@@ -568,15 +574,11 @@ static string generate_dcasx_from_casx_impl(enum lf_gen_type type,
 	string union_name = lf_gen_type_dcas_name(type, false);
 	string_init(&s, 256);
 
-	lf_gen_declare_var_str_type(&s, union_name.buffer, "val_orig", 1);
-	string_append_raw(&s, "\tval_orig.scalar = ", 0);
+	string_append_raw(&s, "\t return ", 0);
 	string_append_raw(&s, tdw_cas_ns, 0);
 	string_append_raw(&s, tdw_alias, 0);
-	string_append_raw(&s, "(&p->scalar, val_old.scalar, val_new.scalar);\n",
+	string_append_raw(&s, "(&p->scalar, &val_old->scalar, val_new.scalar);",
 			  0);
-	string_append_raw(
-		&s, "\t*success = val_orig.scalar == val_old.scalar;\n", 0);
-	lf_gen_return(&s, "val_orig", 1);
 
 	string_destroy(&union_name);
 	return s;
@@ -616,16 +618,17 @@ static string generate_dcasx_impl(enum lf_gen_type type)
 	}
 	static const char *asm_dcasx16b_x64 =
 		"'lock cmpxchg16b %0'\n"
-		": '+m'(*p->tuple), '=@ccz'(*success),\n"
-		"  '+a'(val_old.tuple[0]),\n"
-		"  '+d'(val_old.tuple[1])\n"
+		": '+m'(*p->tuple), '=@ccz'(zf),\n"
+		"  '+a'(val_old->tuple[0]),\n"
+		"  '+d'(val_old->tuple[1])\n"
 		": 'b'(val_new.tuple[0]), 'c'(val_new.tuple[1])\n"
 		": 'memory', 'cc'";
 	/* Use lock cmpxchg16b */
 	string s;
 	string_init(&s, 256);
+	lf_gen_declare_var_str_type(&s, "bool", "zf", 1);
 	append_inline_asm(&s, type, asm_dcasx16b_x64, true);
-	lf_gen_return(&s, "val_old", 1);
+	lf_gen_return(&s, "zf", 1);
 	return s;
 }
 
@@ -714,8 +717,9 @@ static void generate_cas(void)
 {
 	const char *cas_comment =
 		"lf_op_cas and lf_op_cax use the cmpxchg instruction to perform an atomic CAS. "
-		"lf_op_cas returns a boolean that indicates if the CAS was successful, and "
-		"lf_op_casx returns the original value in p (val_old if successful).\n\n"
+		"Both functions return a boolean that indicate if the CAS was successful. "
+		"The only difference is lf_op_casx takes a pointer to val_old and loads p's "
+		"actual value into val_old on failure.\n\n"
 		"I just want to make a note of how this works so I don't forget in the future. "
 		"cmpxchg uses the a register (rax) as val_old and places p's orignal value in "
 		"the a register on failure. This is why we can simply return val_old in casx: "

@@ -153,9 +153,8 @@ static void generate_cas(void)
 		"\t\t__ATOMIC_RELAXED, __ATOMIC_RELAXED);";
 
 	static const char *casx_impl =
-		"\t(void)__atomic_compare_exchange_n(p, &val_old, val_new, false, \n"
-		"\t\t__ATOMIC_RELAXED, __ATOMIC_RELAXED);\n"
-		"\treturn val_old;";
+		"\treturn __atomic_compare_exchange_n(p, val_old, val_new, false, \n"
+		"\t\t__ATOMIC_RELAXED, __ATOMIC_RELAXED);";
 
 	generate_all_cast_ptr(cas_impl, lf_gen_func_cas_define);
 	generate_all_cast_ptr(casx_impl, lf_gen_func_casx_define);

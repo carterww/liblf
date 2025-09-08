@@ -12,7 +12,7 @@
 
 static const char *func_prefix = "LF_ATTR_ALWAYS_INLINE\nstatic ";
 
-#define funcs_for_each(func_enum_var) \
+#define funcs_for_each(func_enum_var)          \
 	for (func_enum_var = LF_GEN_FUNC_LOAD; \
 	     func_enum_var < LF_GEN_FUNC_COUNT; ++func_enum_var)
 
@@ -275,33 +275,32 @@ static string lf_gen_func_swap_define(enum lf_gen_type type, const char *impl)
 				  param_names, 2, impl);
 }
 
-static string lf_gen_func_cas_define_helper(enum lf_gen_type type,
-					    const char *impl, bool isx)
+static string lf_gen_func_cas_define(enum lf_gen_type type, const char *impl)
 {
 	static const char *param_names[3] = { "p", "val_old", "val_new" };
 	const char *param_types[3] = { NULL, NULL, NULL };
 	TYPE_NAME_VARS(type);
+	NAMESPACE_VAR(LF_GEN_FUNC_CAS);
 	param_types[0] = type_name_ptr;
 	param_types[1] = type_name;
 	param_types[2] = type_name;
 
-	const char *return_value = isx ? type_name : "bool";
-	const char *namespace =
-		isx ? lf_gen_func_category_namespaces[LF_GEN_FUNC_CASX] :
-		      lf_gen_func_category_namespaces[LF_GEN_FUNC_CAS];
-
-	return lf_gen_func_define(return_value, namespace, type_alias,
-				  param_types, param_names, 3, impl);
-}
-
-static string lf_gen_func_cas_define(enum lf_gen_type type, const char *impl)
-{
-	return lf_gen_func_cas_define_helper(type, impl, false);
+	return lf_gen_func_define("bool", namespace, type_alias, param_types,
+				  param_names, 3, impl);
 }
 
 static string lf_gen_func_casx_define(enum lf_gen_type type, const char *impl)
 {
-	return lf_gen_func_cas_define_helper(type, impl, true);
+	static const char *param_names[3] = { "p", "val_old", "val_new" };
+	const char *param_types[3] = { NULL, NULL, NULL };
+	TYPE_NAME_VARS(type);
+	NAMESPACE_VAR(LF_GEN_FUNC_CASX);
+	param_types[0] = type_name_ptr;
+	param_types[1] = type_name_ptr;
+	param_types[2] = type_name;
+
+	return lf_gen_func_define("bool", namespace, type_alias, param_types,
+				  param_names, 3, impl);
 }
 
 static string lf_gen_func_fainc_fadec_define(enum lf_gen_type type,
@@ -393,20 +392,22 @@ static string lf_gen_func_dcas_define(enum lf_gen_type type, const char *impl)
 
 static string lf_gen_func_dcasx_define(enum lf_gen_type type, const char *impl)
 {
-	static const char *param_names[4] = { "p", "val_old", "val_new",
-					      "success" };
-	const char *param_types[4] = { NULL, NULL, NULL, "bool *" };
+	static const char *param_names[4] = { "p", "val_old", "val_new" };
+	const char *param_types[4] = {
+		NULL,
+		NULL,
+		NULL,
+	};
 	string union_type_ptr = lf_gen_type_dcas_name(type, true);
 	string union_type = lf_gen_type_dcas_name(type, false);
 	TYPE_NAME_VARS(type);
 	NAMESPACE_VAR(LF_GEN_FUNC_DCASX);
 	param_types[0] = union_type_ptr.buffer;
-	param_types[1] = union_type.buffer;
+	param_types[1] = union_type_ptr.buffer;
 	param_types[2] = union_type.buffer;
 
-	string result = lf_gen_func_define(union_type.buffer, namespace,
-					   type_alias, param_types, param_names,
-					   4, impl);
+	string result = lf_gen_func_define("bool", namespace, type_alias,
+					   param_types, param_names, 3, impl);
 	string_destroy(&union_type_ptr);
 	string_destroy(&union_type);
 	return result;
