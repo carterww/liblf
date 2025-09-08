@@ -301,8 +301,8 @@ static bool lf_ring_spmc_dequeue(lf_ring_spsc *ring, lf_ring_slot_data *item)
 {
 	size_t t, h, idx;
 
+	h = lf_op_load_size(&ring->head);
 	do {
-		h = lf_op_load_size(&ring->head);
 		t = lf_op_load_size(&ring->tail);
 		if (t == h) {
 			return false;
@@ -318,7 +318,7 @@ static bool lf_ring_spmc_dequeue(lf_ring_spsc *ring, lf_ring_slot_data *item)
 		/* If CAS fails it means someone else consumed item.
 		 * Try again.
 		 */
-	} while (!lf_op_cas_size(&ring->head, h, h + 1));
+	} while (!lf_op_casx_size(&ring->head, &h, h + 1));
 	return true;
 }
 
@@ -367,8 +367,8 @@ static bool lf_ring_mpsc_enqueue(lf_ring_mpmc *ring,
 	intptr_t diff_signed;
 	lf_ring_mpmc_slot *slot;
 
+	t = lf_op_load_size(&ring->tail);
 	while (true) {
-		t = lf_op_load_size(&ring->tail);
 		idx = t & ring->mask;
 		slot = &ring->buf[idx];
 		seq = lf_op_load_size(&slot->seq);
@@ -390,7 +390,7 @@ static bool lf_ring_mpsc_enqueue(lf_ring_mpmc *ring,
 		 * from the slot and ring buffer is full.
 		 */
 		if (diff_signed == 0) {
-			if (lf_op_cas_size(&ring->tail, t, t + 1)) {
+			if (lf_op_casx_size(&ring->tail, &t, t + 1)) {
 				break;
 			}
 		} else if (diff_signed < 0) {
@@ -467,8 +467,8 @@ static bool lf_ring_mpmc_dequeue(lf_ring_mpmc *ring, lf_ring_slot_data *item)
 	intptr_t diff_signed;
 	lf_ring_mpmc_slot *slot;
 
+	h = lf_op_load_size(&ring->head);
 	while (true) {
-		h = lf_op_load_size(&ring->head);
 		h_next = h + 1;
 		idx = h & ring->mask;
 		slot = &ring->buf[idx];
@@ -476,7 +476,7 @@ static bool lf_ring_mpmc_dequeue(lf_ring_mpmc *ring, lf_ring_slot_data *item)
 
 		diff_signed = (intptr_t)seq - (intptr_t)h_next;
 		if (diff_signed == 0) {
-			if (lf_op_cas_size(&ring->head, h, h_next)) {
+			if (lf_op_casx_size(&ring->head, &h, h_next)) {
 				break;
 			}
 		} else if (diff_signed < 0) {
