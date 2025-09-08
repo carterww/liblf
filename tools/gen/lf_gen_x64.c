@@ -409,8 +409,8 @@ static string generate_faand_faor_faxor_impl(enum lf_gen_type type,
 	string load_func = lf_gen_func_get_name(type, LF_GEN_FUNC_LOAD);
 	string_append_raw(&load_func, "(p)", 3);
 
-	string cas_func = lf_gen_func_get_name(type, LF_GEN_FUNC_CAS);
-	string_append_raw(&cas_func, "(p, old, new)", 13);
+	string cas_func = lf_gen_func_get_name(type, LF_GEN_FUNC_CASX);
+	string_append_raw(&cas_func, "(p, &old, new)", 14);
 
 	const char *op = table[cat - LF_GEN_FUNC_FAAND];
 	string new_set;
@@ -419,10 +419,9 @@ static string generate_faand_faor_faxor_impl(enum lf_gen_type type,
 	string_append_raw(&new_set, op, 1);
 	string_append_raw(&new_set, " val)", 5);
 
-	lf_gen_declare_var(&s, type, "old", 1);
+	lf_gen_declare_and_set_var(&s, type, "old", load_func.buffer, 1);
 	lf_gen_declare_var(&s, type, "new", 1);
 	string_append_raw(&s, "\tdo {\n", 0);
-	lf_gen_set_var(&s, "old", load_func.buffer, 2);
 	lf_gen_set_var(&s, "new", new_set.buffer, 2);
 	string_append_raw(&s, "\t} while (!", 0);
 	string_append(&s, &cas_func);

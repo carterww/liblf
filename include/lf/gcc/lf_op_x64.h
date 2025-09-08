@@ -4,7 +4,7 @@
 
 /* This file was automatically generated. DO NOT MODIFY IT DIRECTLY.
  *
- * Date:      2025-09-08 10:23:09
+ * Date:      2025-09-08 10:36:49
  * Generator: liblf/tools/gen/lf_gen_x64.c
  * Version:   v0.1.0
  *
@@ -1794,720 +1794,660 @@ static lf_native_word lf_op_fadec_native(lf_native_word *p)
 LF_ATTR_ALWAYS_INLINE
 static intptr_t lf_op_faand_iptr(intptr_t *p, intptr_t val)
 {
-	intptr_t old;
+	intptr_t old = lf_op_load_iptr(p);
 	intptr_t new;
 	do {
-		old = lf_op_load_iptr(p);
 		new = (old & val);
-	} while (!lf_op_cas_iptr(p, old, new));
+	} while (!lf_op_casx_iptr(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uintptr_t lf_op_faand_uptr(uintptr_t *p, uintptr_t val)
 {
-	uintptr_t old;
+	uintptr_t old = lf_op_load_uptr(p);
 	uintptr_t new;
 	do {
-		old = lf_op_load_uptr(p);
 		new = (old & val);
-	} while (!lf_op_cas_uptr(p, old, new));
+	} while (!lf_op_casx_uptr(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static signed char lf_op_faand_char(signed char *p, signed char val)
 {
-	signed char old;
+	signed char old = lf_op_load_char(p);
 	signed char new;
 	do {
-		old = lf_op_load_char(p);
 		new = (old & val);
-	} while (!lf_op_cas_char(p, old, new));
+	} while (!lf_op_casx_char(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned char lf_op_faand_uchar(unsigned char *p, unsigned char val)
 {
-	unsigned char old;
+	unsigned char old = lf_op_load_uchar(p);
 	unsigned char new;
 	do {
-		old = lf_op_load_uchar(p);
 		new = (old & val);
-	} while (!lf_op_cas_uchar(p, old, new));
+	} while (!lf_op_casx_uchar(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static short lf_op_faand_short(short *p, short val)
 {
-	short old;
+	short old = lf_op_load_short(p);
 	short new;
 	do {
-		old = lf_op_load_short(p);
 		new = (old & val);
-	} while (!lf_op_cas_short(p, old, new));
+	} while (!lf_op_casx_short(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned short lf_op_faand_ushort(unsigned short *p, unsigned short val)
 {
-	unsigned short old;
+	unsigned short old = lf_op_load_ushort(p);
 	unsigned short new;
 	do {
-		old = lf_op_load_ushort(p);
 		new = (old & val);
-	} while (!lf_op_cas_ushort(p, old, new));
+	} while (!lf_op_casx_ushort(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int lf_op_faand_int(int *p, int val)
 {
-	int old;
+	int old = lf_op_load_int(p);
 	int new;
 	do {
-		old = lf_op_load_int(p);
 		new = (old & val);
-	} while (!lf_op_cas_int(p, old, new));
+	} while (!lf_op_casx_int(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_op_faand_uint(unsigned int *p, unsigned int val)
 {
-	unsigned int old;
+	unsigned int old = lf_op_load_uint(p);
 	unsigned int new;
 	do {
-		old = lf_op_load_uint(p);
 		new = (old & val);
-	} while (!lf_op_cas_uint(p, old, new));
+	} while (!lf_op_casx_uint(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static long lf_op_faand_long(long *p, long val)
 {
-	long old;
+	long old = lf_op_load_long(p);
 	long new;
 	do {
-		old = lf_op_load_long(p);
 		new = (old & val);
-	} while (!lf_op_cas_long(p, old, new));
+	} while (!lf_op_casx_long(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned long lf_op_faand_ulong(unsigned long *p, unsigned long val)
 {
-	unsigned long old;
+	unsigned long old = lf_op_load_ulong(p);
 	unsigned long new;
 	do {
-		old = lf_op_load_ulong(p);
 		new = (old & val);
-	} while (!lf_op_cas_ulong(p, old, new));
+	} while (!lf_op_casx_ulong(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int8_t lf_op_faand_i8(int8_t *p, int8_t val)
 {
-	int8_t old;
+	int8_t old = lf_op_load_i8(p);
 	int8_t new;
 	do {
-		old = lf_op_load_i8(p);
 		new = (old & val);
-	} while (!lf_op_cas_i8(p, old, new));
+	} while (!lf_op_casx_i8(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint8_t lf_op_faand_u8(uint8_t *p, uint8_t val)
 {
-	uint8_t old;
+	uint8_t old = lf_op_load_u8(p);
 	uint8_t new;
 	do {
-		old = lf_op_load_u8(p);
 		new = (old & val);
-	} while (!lf_op_cas_u8(p, old, new));
+	} while (!lf_op_casx_u8(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int16_t lf_op_faand_i16(int16_t *p, int16_t val)
 {
-	int16_t old;
+	int16_t old = lf_op_load_i16(p);
 	int16_t new;
 	do {
-		old = lf_op_load_i16(p);
 		new = (old & val);
-	} while (!lf_op_cas_i16(p, old, new));
+	} while (!lf_op_casx_i16(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint16_t lf_op_faand_u16(uint16_t *p, uint16_t val)
 {
-	uint16_t old;
+	uint16_t old = lf_op_load_u16(p);
 	uint16_t new;
 	do {
-		old = lf_op_load_u16(p);
 		new = (old & val);
-	} while (!lf_op_cas_u16(p, old, new));
+	} while (!lf_op_casx_u16(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int32_t lf_op_faand_i32(int32_t *p, int32_t val)
 {
-	int32_t old;
+	int32_t old = lf_op_load_i32(p);
 	int32_t new;
 	do {
-		old = lf_op_load_i32(p);
 		new = (old & val);
-	} while (!lf_op_cas_i32(p, old, new));
+	} while (!lf_op_casx_i32(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint32_t lf_op_faand_u32(uint32_t *p, uint32_t val)
 {
-	uint32_t old;
+	uint32_t old = lf_op_load_u32(p);
 	uint32_t new;
 	do {
-		old = lf_op_load_u32(p);
 		new = (old & val);
-	} while (!lf_op_cas_u32(p, old, new));
+	} while (!lf_op_casx_u32(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int64_t lf_op_faand_i64(int64_t *p, int64_t val)
 {
-	int64_t old;
+	int64_t old = lf_op_load_i64(p);
 	int64_t new;
 	do {
-		old = lf_op_load_i64(p);
 		new = (old & val);
-	} while (!lf_op_cas_i64(p, old, new));
+	} while (!lf_op_casx_i64(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint64_t lf_op_faand_u64(uint64_t *p, uint64_t val)
 {
-	uint64_t old;
+	uint64_t old = lf_op_load_u64(p);
 	uint64_t new;
 	do {
-		old = lf_op_load_u64(p);
 		new = (old & val);
-	} while (!lf_op_cas_u64(p, old, new));
+	} while (!lf_op_casx_u64(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static size_t lf_op_faand_size(size_t *p, size_t val)
 {
-	size_t old;
+	size_t old = lf_op_load_size(p);
 	size_t new;
 	do {
-		old = lf_op_load_size(p);
 		new = (old & val);
-	} while (!lf_op_cas_size(p, old, new));
+	} while (!lf_op_casx_size(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static lf_native_word lf_op_faand_native(lf_native_word *p, lf_native_word val)
 {
-	lf_native_word old;
+	lf_native_word old = lf_op_load_native(p);
 	lf_native_word new;
 	do {
-		old = lf_op_load_native(p);
 		new = (old & val);
-	} while (!lf_op_cas_native(p, old, new));
+	} while (!lf_op_casx_native(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static intptr_t lf_op_faor_iptr(intptr_t *p, intptr_t val)
 {
-	intptr_t old;
+	intptr_t old = lf_op_load_iptr(p);
 	intptr_t new;
 	do {
-		old = lf_op_load_iptr(p);
 		new = (old | val);
-	} while (!lf_op_cas_iptr(p, old, new));
+	} while (!lf_op_casx_iptr(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uintptr_t lf_op_faor_uptr(uintptr_t *p, uintptr_t val)
 {
-	uintptr_t old;
+	uintptr_t old = lf_op_load_uptr(p);
 	uintptr_t new;
 	do {
-		old = lf_op_load_uptr(p);
 		new = (old | val);
-	} while (!lf_op_cas_uptr(p, old, new));
+	} while (!lf_op_casx_uptr(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static signed char lf_op_faor_char(signed char *p, signed char val)
 {
-	signed char old;
+	signed char old = lf_op_load_char(p);
 	signed char new;
 	do {
-		old = lf_op_load_char(p);
 		new = (old | val);
-	} while (!lf_op_cas_char(p, old, new));
+	} while (!lf_op_casx_char(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned char lf_op_faor_uchar(unsigned char *p, unsigned char val)
 {
-	unsigned char old;
+	unsigned char old = lf_op_load_uchar(p);
 	unsigned char new;
 	do {
-		old = lf_op_load_uchar(p);
 		new = (old | val);
-	} while (!lf_op_cas_uchar(p, old, new));
+	} while (!lf_op_casx_uchar(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static short lf_op_faor_short(short *p, short val)
 {
-	short old;
+	short old = lf_op_load_short(p);
 	short new;
 	do {
-		old = lf_op_load_short(p);
 		new = (old | val);
-	} while (!lf_op_cas_short(p, old, new));
+	} while (!lf_op_casx_short(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned short lf_op_faor_ushort(unsigned short *p, unsigned short val)
 {
-	unsigned short old;
+	unsigned short old = lf_op_load_ushort(p);
 	unsigned short new;
 	do {
-		old = lf_op_load_ushort(p);
 		new = (old | val);
-	} while (!lf_op_cas_ushort(p, old, new));
+	} while (!lf_op_casx_ushort(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int lf_op_faor_int(int *p, int val)
 {
-	int old;
+	int old = lf_op_load_int(p);
 	int new;
 	do {
-		old = lf_op_load_int(p);
 		new = (old | val);
-	} while (!lf_op_cas_int(p, old, new));
+	} while (!lf_op_casx_int(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_op_faor_uint(unsigned int *p, unsigned int val)
 {
-	unsigned int old;
+	unsigned int old = lf_op_load_uint(p);
 	unsigned int new;
 	do {
-		old = lf_op_load_uint(p);
 		new = (old | val);
-	} while (!lf_op_cas_uint(p, old, new));
+	} while (!lf_op_casx_uint(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static long lf_op_faor_long(long *p, long val)
 {
-	long old;
+	long old = lf_op_load_long(p);
 	long new;
 	do {
-		old = lf_op_load_long(p);
 		new = (old | val);
-	} while (!lf_op_cas_long(p, old, new));
+	} while (!lf_op_casx_long(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned long lf_op_faor_ulong(unsigned long *p, unsigned long val)
 {
-	unsigned long old;
+	unsigned long old = lf_op_load_ulong(p);
 	unsigned long new;
 	do {
-		old = lf_op_load_ulong(p);
 		new = (old | val);
-	} while (!lf_op_cas_ulong(p, old, new));
+	} while (!lf_op_casx_ulong(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int8_t lf_op_faor_i8(int8_t *p, int8_t val)
 {
-	int8_t old;
+	int8_t old = lf_op_load_i8(p);
 	int8_t new;
 	do {
-		old = lf_op_load_i8(p);
 		new = (old | val);
-	} while (!lf_op_cas_i8(p, old, new));
+	} while (!lf_op_casx_i8(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint8_t lf_op_faor_u8(uint8_t *p, uint8_t val)
 {
-	uint8_t old;
+	uint8_t old = lf_op_load_u8(p);
 	uint8_t new;
 	do {
-		old = lf_op_load_u8(p);
 		new = (old | val);
-	} while (!lf_op_cas_u8(p, old, new));
+	} while (!lf_op_casx_u8(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int16_t lf_op_faor_i16(int16_t *p, int16_t val)
 {
-	int16_t old;
+	int16_t old = lf_op_load_i16(p);
 	int16_t new;
 	do {
-		old = lf_op_load_i16(p);
 		new = (old | val);
-	} while (!lf_op_cas_i16(p, old, new));
+	} while (!lf_op_casx_i16(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint16_t lf_op_faor_u16(uint16_t *p, uint16_t val)
 {
-	uint16_t old;
+	uint16_t old = lf_op_load_u16(p);
 	uint16_t new;
 	do {
-		old = lf_op_load_u16(p);
 		new = (old | val);
-	} while (!lf_op_cas_u16(p, old, new));
+	} while (!lf_op_casx_u16(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int32_t lf_op_faor_i32(int32_t *p, int32_t val)
 {
-	int32_t old;
+	int32_t old = lf_op_load_i32(p);
 	int32_t new;
 	do {
-		old = lf_op_load_i32(p);
 		new = (old | val);
-	} while (!lf_op_cas_i32(p, old, new));
+	} while (!lf_op_casx_i32(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint32_t lf_op_faor_u32(uint32_t *p, uint32_t val)
 {
-	uint32_t old;
+	uint32_t old = lf_op_load_u32(p);
 	uint32_t new;
 	do {
-		old = lf_op_load_u32(p);
 		new = (old | val);
-	} while (!lf_op_cas_u32(p, old, new));
+	} while (!lf_op_casx_u32(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int64_t lf_op_faor_i64(int64_t *p, int64_t val)
 {
-	int64_t old;
+	int64_t old = lf_op_load_i64(p);
 	int64_t new;
 	do {
-		old = lf_op_load_i64(p);
 		new = (old | val);
-	} while (!lf_op_cas_i64(p, old, new));
+	} while (!lf_op_casx_i64(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint64_t lf_op_faor_u64(uint64_t *p, uint64_t val)
 {
-	uint64_t old;
+	uint64_t old = lf_op_load_u64(p);
 	uint64_t new;
 	do {
-		old = lf_op_load_u64(p);
 		new = (old | val);
-	} while (!lf_op_cas_u64(p, old, new));
+	} while (!lf_op_casx_u64(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static size_t lf_op_faor_size(size_t *p, size_t val)
 {
-	size_t old;
+	size_t old = lf_op_load_size(p);
 	size_t new;
 	do {
-		old = lf_op_load_size(p);
 		new = (old | val);
-	} while (!lf_op_cas_size(p, old, new));
+	} while (!lf_op_casx_size(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static lf_native_word lf_op_faor_native(lf_native_word *p, lf_native_word val)
 {
-	lf_native_word old;
+	lf_native_word old = lf_op_load_native(p);
 	lf_native_word new;
 	do {
-		old = lf_op_load_native(p);
 		new = (old | val);
-	} while (!lf_op_cas_native(p, old, new));
+	} while (!lf_op_casx_native(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static intptr_t lf_op_faxor_iptr(intptr_t *p, intptr_t val)
 {
-	intptr_t old;
+	intptr_t old = lf_op_load_iptr(p);
 	intptr_t new;
 	do {
-		old = lf_op_load_iptr(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_iptr(p, old, new));
+	} while (!lf_op_casx_iptr(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uintptr_t lf_op_faxor_uptr(uintptr_t *p, uintptr_t val)
 {
-	uintptr_t old;
+	uintptr_t old = lf_op_load_uptr(p);
 	uintptr_t new;
 	do {
-		old = lf_op_load_uptr(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_uptr(p, old, new));
+	} while (!lf_op_casx_uptr(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static signed char lf_op_faxor_char(signed char *p, signed char val)
 {
-	signed char old;
+	signed char old = lf_op_load_char(p);
 	signed char new;
 	do {
-		old = lf_op_load_char(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_char(p, old, new));
+	} while (!lf_op_casx_char(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned char lf_op_faxor_uchar(unsigned char *p, unsigned char val)
 {
-	unsigned char old;
+	unsigned char old = lf_op_load_uchar(p);
 	unsigned char new;
 	do {
-		old = lf_op_load_uchar(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_uchar(p, old, new));
+	} while (!lf_op_casx_uchar(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static short lf_op_faxor_short(short *p, short val)
 {
-	short old;
+	short old = lf_op_load_short(p);
 	short new;
 	do {
-		old = lf_op_load_short(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_short(p, old, new));
+	} while (!lf_op_casx_short(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned short lf_op_faxor_ushort(unsigned short *p, unsigned short val)
 {
-	unsigned short old;
+	unsigned short old = lf_op_load_ushort(p);
 	unsigned short new;
 	do {
-		old = lf_op_load_ushort(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_ushort(p, old, new));
+	} while (!lf_op_casx_ushort(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int lf_op_faxor_int(int *p, int val)
 {
-	int old;
+	int old = lf_op_load_int(p);
 	int new;
 	do {
-		old = lf_op_load_int(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_int(p, old, new));
+	} while (!lf_op_casx_int(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned int lf_op_faxor_uint(unsigned int *p, unsigned int val)
 {
-	unsigned int old;
+	unsigned int old = lf_op_load_uint(p);
 	unsigned int new;
 	do {
-		old = lf_op_load_uint(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_uint(p, old, new));
+	} while (!lf_op_casx_uint(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static long lf_op_faxor_long(long *p, long val)
 {
-	long old;
+	long old = lf_op_load_long(p);
 	long new;
 	do {
-		old = lf_op_load_long(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_long(p, old, new));
+	} while (!lf_op_casx_long(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static unsigned long lf_op_faxor_ulong(unsigned long *p, unsigned long val)
 {
-	unsigned long old;
+	unsigned long old = lf_op_load_ulong(p);
 	unsigned long new;
 	do {
-		old = lf_op_load_ulong(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_ulong(p, old, new));
+	} while (!lf_op_casx_ulong(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int8_t lf_op_faxor_i8(int8_t *p, int8_t val)
 {
-	int8_t old;
+	int8_t old = lf_op_load_i8(p);
 	int8_t new;
 	do {
-		old = lf_op_load_i8(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_i8(p, old, new));
+	} while (!lf_op_casx_i8(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint8_t lf_op_faxor_u8(uint8_t *p, uint8_t val)
 {
-	uint8_t old;
+	uint8_t old = lf_op_load_u8(p);
 	uint8_t new;
 	do {
-		old = lf_op_load_u8(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_u8(p, old, new));
+	} while (!lf_op_casx_u8(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int16_t lf_op_faxor_i16(int16_t *p, int16_t val)
 {
-	int16_t old;
+	int16_t old = lf_op_load_i16(p);
 	int16_t new;
 	do {
-		old = lf_op_load_i16(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_i16(p, old, new));
+	} while (!lf_op_casx_i16(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint16_t lf_op_faxor_u16(uint16_t *p, uint16_t val)
 {
-	uint16_t old;
+	uint16_t old = lf_op_load_u16(p);
 	uint16_t new;
 	do {
-		old = lf_op_load_u16(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_u16(p, old, new));
+	} while (!lf_op_casx_u16(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int32_t lf_op_faxor_i32(int32_t *p, int32_t val)
 {
-	int32_t old;
+	int32_t old = lf_op_load_i32(p);
 	int32_t new;
 	do {
-		old = lf_op_load_i32(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_i32(p, old, new));
+	} while (!lf_op_casx_i32(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint32_t lf_op_faxor_u32(uint32_t *p, uint32_t val)
 {
-	uint32_t old;
+	uint32_t old = lf_op_load_u32(p);
 	uint32_t new;
 	do {
-		old = lf_op_load_u32(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_u32(p, old, new));
+	} while (!lf_op_casx_u32(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static int64_t lf_op_faxor_i64(int64_t *p, int64_t val)
 {
-	int64_t old;
+	int64_t old = lf_op_load_i64(p);
 	int64_t new;
 	do {
-		old = lf_op_load_i64(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_i64(p, old, new));
+	} while (!lf_op_casx_i64(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static uint64_t lf_op_faxor_u64(uint64_t *p, uint64_t val)
 {
-	uint64_t old;
+	uint64_t old = lf_op_load_u64(p);
 	uint64_t new;
 	do {
-		old = lf_op_load_u64(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_u64(p, old, new));
+	} while (!lf_op_casx_u64(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static size_t lf_op_faxor_size(size_t *p, size_t val)
 {
-	size_t old;
+	size_t old = lf_op_load_size(p);
 	size_t new;
 	do {
-		old = lf_op_load_size(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_size(p, old, new));
+	} while (!lf_op_casx_size(p, &old, new));
 	return old;
 }
 
 LF_ATTR_ALWAYS_INLINE
 static lf_native_word lf_op_faxor_native(lf_native_word *p, lf_native_word val)
 {
-	lf_native_word old;
+	lf_native_word old = lf_op_load_native(p);
 	lf_native_word new;
 	do {
-		old = lf_op_load_native(p);
 		new = (old ^ val);
-	} while (!lf_op_cas_native(p, old, new));
+	} while (!lf_op_casx_native(p, &old, new));
 	return old;
 }
 
