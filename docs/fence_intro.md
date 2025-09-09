@@ -70,7 +70,7 @@ The compiler can actually reorder loads and stores at compile time in the name o
 performance.
 
 Compilers are allowed to reorder operations if it doesn't break the
-(as-if rule)[https://en.cppreference.com/w/cpp/language/as_if.html]. In essence, if
+[as-if rule](https://en.cppreference.com/w/cpp/language/as_if.html). In essence, if
 the compiler reorders operations, it must behave "as if" the original code was
 executing.
 

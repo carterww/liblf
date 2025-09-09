@@ -8,7 +8,7 @@ This API was heavily inspired by [ck's](https://github.com/concurrencykit/ck)
 fence API.
 
 ## Functions
-These can be found in (lf_op.h)[../include/lf_op.h] and the implementation
+These can be found in [lf_op.h](../include/lf_op.h) and the implementation
 header files.
 - **lf_fence_cc()**: Prevents compiler from reordering operations.
 - **lf_fence_full()**: Always emits a fence that orders all temporal memory operations.
