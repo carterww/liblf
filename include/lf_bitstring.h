@@ -238,7 +238,7 @@ static unsigned int lf_bitstring_find_set_word(lf_native_word word)
 	lf_assert(word != 0);
 #if defined(LF_ARCH_X86_64)
 	__asm__ __volatile__("tzcnt %1, %0" : "=r"(idx) : "rm"(word) : "cc");
-#elif defined(LF_ARCH_ARM64) || defined(LF_ARCH_ARM)
+#elif defined(LF_ARCH_ARM64) || defined(LF_ARCH_ARM32)
 	__asm__ __volatile__("clz %0, %1" : "=r"(idx) : "r"(word) :);
 	idx = LF_BITSTRING_WORD_BITS - idx - 1;
 #else

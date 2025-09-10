@@ -15,13 +15,13 @@
 
 #elif defined(__arm__)
 
-#define LF_ARCH_ARM
+#define LF_ARCH_ARM32
 #define LF_MEM_WMO
 
 #if defined(__thumb__)
-#define LF_ARCH_ARM_THUMB
+#define LF_ARCH_ARM32_THUMB2
 #else
-#define LF_ARCH_ARM_NO_THUMB
+#define LF_ARCH_ARM32_NO_THUMB2
 #endif /* __thumb__ */
 
 #elif defined(__aarch64__)
@@ -55,7 +55,7 @@
 	defined(LF_ARCH_RISCV64)
 #define LF_ARCH_64_BIT
 typedef uint64_t lf_native_word;
-#elif defined(LF_ARCH_ARM) || defined(LF_ARCH_X86) || defined(LF_ARCH_RISCV32)
+#elif defined(LF_ARCH_ARM32) || defined(LF_ARCH_X86) || defined(LF_ARCH_RISCV32)
 #define LF_ARCH_32_BIT
 typedef uint32_t lf_native_word;
 #endif
